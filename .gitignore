@@ -1,0 +1,11 @@
+# eval harness output
+evals-results/
+*.eval-results.json
+
+# tooling
+node_modules/
+.venv/
+
+# OS noise
+.DS_Store
+*.log

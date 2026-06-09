@@ -1,0 +1,16 @@
+{
+  "name": "bitwise",
+  "owner": {
+    "name": "Bitwise Media Group",
+    "email": "deavon@bitwisemedia.co.uk"
+  },
+  "description": "Bitwise Media Group skills and plugins for coding agents.",
+  "plugins": [
+    {
+      "name": "terraform",
+      "source": "./plugins/terraform",
+      "description": "Terraform style conventions, module scaffolding, and fmt/validate/tflint workflows.",
+      "keywords": ["terraform", "hcl", "iac", "tflint"]
+    }
+  ]
+}

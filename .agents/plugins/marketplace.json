@@ -1,0 +1,20 @@
+{
+  "name": "bitwise",
+  "interface": {
+    "displayName": "Bitwise"
+  },
+  "plugins": [
+    {
+      "name": "terraform",
+      "source": {
+        "source": "local",
+        "path": "./plugins/terraform"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
