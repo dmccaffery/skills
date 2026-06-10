@@ -1,0 +1,12 @@
+# tools/eval/report.py owns the generated evaluation reports.
+EVALUATION.md
+plugins/*/EVALUATION.md
+
+# Prettier folds long frontmatter scalars onto multiple lines, but the skill
+# `description` must stay single-line: it is the only activation signal and
+# some harnesses parse frontmatter line-by-line. markdownlint still lints
+# skill bodies (make lint).
+plugins/*/skills/*/SKILL.md
+
+# Local agent state (plans, settings) — not part of the published repo.
+.claude/

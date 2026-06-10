@@ -1,0 +1,11 @@
+{
+  "name": "bitwise-skills",
+  "private": true,
+  "type": "module",
+  "description": "Lint and formatting tools for the skills marketplace.",
+  "license": "MIT",
+  "devDependencies": {
+    "markdownlint-cli2": "^0.22.1",
+    "prettier": "^3.0.0"
+  }
+}
