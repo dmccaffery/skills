@@ -72,16 +72,16 @@ Run before committing:
 
 ```sh
 make fmt                          # prettier, pinned via package.json (SKILL.md is prettier-ignored)
-make addlicense                   # SPDX license headers via addlicense, pinned in tools/go.mod
+make license                      # SPDX license headers via addlicense, pinned in tools/go.mod
 make eval-static                  # Tier 0: frontmatter, manifests, version sync
 claude plugin validate .          # Claude marketplace/plugin schema
 make lint                         # markdown style (120-col, config in .markdownlint-cli2.yaml)
 ```
 
 Node CLIs run from `node_modules/.bin` (locked by `package-lock.json` — no npx, no globals); Go developer CLIs are
-pinned in `tools/go.mod` and run via `go -C tools tool`. The Makefile also wraps Tiers 1–2 (`make eval-trigger`,
-`make eval-behavior`, `make eval` for all three tiers; pass `SKILL=`, `MODELS=`, `RUNS=`) and `make report` for the
-EVALUATION.md files.
+pinned in `tools/go.mod` and run via `go tool` (resolved through the root `go.work`). The Makefile also wraps Tiers 1–2
+(`make eval-trigger`, `make eval-behavior`, `make eval` for all three tiers; pass `SKILL=`, `MODELS=`, `RUNS=`) and
+`make report` for the EVALUATION.md files.
 
 ## Markdown style
 

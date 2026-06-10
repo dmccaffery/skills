@@ -15,18 +15,17 @@ MODELS ?= anthropic
 SKILL_FLAG = $(if $(SKILL),--skill $(SKILL))
 RUNS_FLAG  = $(if $(RUNS),--runs $(RUNS))
 
-# addlicense ignores use absolute globs because `go -C tools` runs it with the
-# working directory set to tools/. plugins/ ships to end users, so scaffolding
-# templates and bundled configs stay header-free.
+# plugins/ ships to end users, so scaffolding templates and bundled configs
+# stay header-free.
 LICENSE_HOLDER := 'Bitwise Media Group'
-LICENSE_IGNORE := -ignore '$(CURDIR)/.git/**' \
-	-ignore '$(CURDIR)/node_modules/**' \
-	-ignore '$(CURDIR)/evals-results/**' \
-	-ignore '$(CURDIR)/.claude/**' \
-	-ignore '$(CURDIR)/plugins/**' \
-	-ignore '$(CURDIR)/commit.sh'
+LICENSE_IGNORE := -ignore '.git/**' \
+	-ignore 'node_modules/**' \
+	-ignore 'evals-results/**' \
+	-ignore '.claude/**' \
+	-ignore 'plugins/**' \
+	-ignore 'commit.sh'
 
-.PHONY: help lint fmt addlicense eval-static eval-trigger eval-behavior eval report
+.PHONY: help lint fmt license eval-static eval-trigger eval-behavior eval report
 
 help: ## list targets
 	@awk -F": .*## " "/^[a-z-]+:.*## /{printf \"  %-14s %s\\n\", \$$1, \$$2}" $(MAKEFILE_LIST)
@@ -37,8 +36,8 @@ fmt: node_modules ## auto-format the repo with prettier (pinned in package.json)
 lint: node_modules ## markdownlint all markdown (config: .markdownlint-cli2.yaml)
 	@ $(NPMBIN)/markdownlint-cli2 "**/*.md"
 
-addlicense: ## inject SPDX license headers (addlicense, pinned in tools/go.mod)
-	@ go -C tools tool addlicense -l mit -c $(LICENSE_HOLDER) -s=only $(LICENSE_IGNORE) "$(CURDIR)"
+license: ## inject SPDX license headers (addlicense, pinned in tools/go.mod)
+	@ go tool addlicense -l mit -c $(LICENSE_HOLDER) -s=only $(LICENSE_IGNORE) .
 
 eval-static: ## Tier 0 - frontmatter, manifests, version sync
 	./scripts/check-skills.sh

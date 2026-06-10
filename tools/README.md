@@ -13,10 +13,11 @@ Developer tooling for this repo:
 | ------------------------------ | ------------------------------------------------- |
 | `github.com/google/addlicense` | Add / verify license headers across source files. |
 
-Run a pinned tool from anywhere in the repo via `go tool` against this module (or just use the Makefile targets):
+The root `go.work` points the go command at this module, so a pinned tool runs as plain `go tool` from anywhere in the
+repo (or just use the Makefile targets):
 
 ```sh
-go -C tools tool addlicense -l mit -c "Bitwise Media Group" -s=only -check .
+go tool addlicense -l mit -c "Bitwise Media Group" -s=only -check .
 ```
 
 ## Maintenance
