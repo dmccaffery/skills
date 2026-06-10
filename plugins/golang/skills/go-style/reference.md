@@ -141,8 +141,23 @@ auto-mapped to `FLAG_NAME` upper-cased with dashes as underscores — gives one 
 terminal and a deployment manifest. Keep all of it in one `Config` struct with a single `Validate()` called at startup:
 every misconfiguration is reported before the program does any work.
 
-For a small program the stdlib `flag` package plus `os.LookupEnv` fallbacks is enough; `pflag` + `viper` earn their
-place once the flag table grows or config files enter the picture.
+For a service or single-purpose binary the stdlib `flag` package plus `os.LookupEnv` fallbacks is enough.
+
+## CLI tools: why cobra + viper
+
+The dividing line is subcommands. The moment a program grows a command tree (`myapp serve`, `myapp migrate up`), the
+stdlib `flag` package forces hand-rolled dispatch, per-command flag sets, and a help system you maintain yourself —
+exactly the boilerplate `cobra` exists to own. Cobra contributes the command tree, persistent vs. local flags, generated
+help/completions, and the metadata (`Short`, `Long`, `Example`, `GroupID`) that doc generators consume (see the
+`go-docs` skill). `viper` complements it on the configuration side: `BindPFlags` merges each command's flags with
+`AutomaticEnv` (prefixed, dashes→underscores) and optional config files into one lookup with the same flag > env >
+config file > default precedence the stdlib pattern establishes.
+
+Two rules keep the dependency contained: commands stay thin adapters — parse and validate input, then call `internal/`
+packages, returning errors through `RunE` so `main` keeps the only `os.Exit` — and viper stays at the edge: resolve it
+into a plain `Config` struct at startup and pass that down, so business logic never imports `viper` or reads ambient
+state. A service with one entrypoint and a handful of flags does not need either library; don't add them until the
+subcommands arrive.
 
 ## Dependencies: stdlib-first
 

@@ -32,5 +32,23 @@
       { "type": "command", "run": "go vet ./...", "requires": "go" },
       { "type": "command", "run": "test -z \"$(gofmt -l .)\"", "requires": "gofmt" }
     ]
+  },
+  {
+    "id": "cli-subcommand",
+    "prompt": "Add a serve subcommand to this CLI in internal/cli/serve.go: it takes a --port flag (default 8080) that can also be set via the MYCLI_PORT environment variable, following our Go house style for CLI tools. Edit the files directly — no need to run go commands or download dependencies.",
+    "allowed_tools": "Read Write Edit Glob Grep Skill Bash(go *) Bash(gofmt *) Bash(mkdir *)",
+    "files": {
+      "go.mod": "module example.com/clidemo\n\ngo 1.24\n\nrequire (\n\tgithub.com/spf13/cobra v1.10.1\n\tgithub.com/spf13/viper v1.21.0\n)\n",
+      "cmd/mycli/main.go": "package main\n\nimport (\n\t\"context\"\n\t\"os\"\n\t\"os/signal\"\n\t\"syscall\"\n\n\t\"example.com/clidemo/internal/cli\"\n)\n\nfunc main() {\n\tctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)\n\tdefer stop()\n\tif err := cli.Root().ExecuteContext(ctx); err != nil {\n\t\tos.Exit(1)\n\t}\n}\n",
+      "internal/cli/root.go": "package cli\n\nimport \"github.com/spf13/cobra\"\n\nvar rootCmd = &cobra.Command{\n\tUse:   \"mycli\",\n\tShort: \"mycli manages demo resources.\",\n}\n\n// Root exposes the root command for main and doc generators.\nfunc Root() *cobra.Command { return rootCmd }\n"
+    },
+    "assertions": [
+      { "type": "file_exists", "path": "internal/cli/serve.go" },
+      { "type": "regex", "path": "internal/cli/serve.go", "pattern": "cobra\\.Command" },
+      { "type": "regex", "path": "internal/cli/serve.go", "pattern": "RunE" },
+      { "type": "regex", "path": "internal/cli/serve.go", "pattern": "viper" },
+      { "type": "regex", "path": "internal/cli/serve.go", "pattern": "port" },
+      { "type": "not_regex", "path": "internal/cli/serve.go", "pattern": "os\\.Exit" }
+    ]
   }
 ]

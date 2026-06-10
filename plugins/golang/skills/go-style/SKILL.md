@@ -1,6 +1,6 @@
 ---
 name: go-style
-description: Modern Go code style for stdlib-first programs — error wrapping with %w, sentinel errors, structured logging with log/slog, context threading, consumer-defined interfaces, nil-safe constructors, net/http servers with method-pattern routing, and flag/env configuration. Use when writing, reviewing, or refactoring Go code (.go files, packages, services), adding error handling or logging to a Go program, or deciding how to shape interfaces, constructors, configuration, or HTTP handlers in Go.
+description: Modern Go code style for stdlib-first programs — error wrapping with %w, sentinel errors, structured logging with log/slog, context threading, consumer-defined interfaces, nil-safe constructors, net/http servers with method-pattern routing, flag/env configuration for services, and cobra commands with viper configuration for CLI tools. Use when writing, reviewing, or refactoring Go code (.go files, packages, services), adding error handling or logging to a Go program, building a Go CLI tool or subcommands (cobra, viper), or deciding how to shape interfaces, constructors, configuration, or HTTP handlers in Go.
 license: MIT
 ---
 
@@ -104,12 +104,41 @@ mux.HandleFunc("GET /healthz", health)
 
 Every flag has a matching environment variable — the flag name upper-cased, dashes as underscores
 (`--client-map-uri` ↔ `CLIENT_MAP_URI`). Parse into one `Config` struct, validate it once at
-startup, and fail fast with a wrapped error.
+startup, and fail fast with a wrapped error. For a service or single-purpose binary the stdlib
+`flag` package with `os.LookupEnv` fallbacks is enough.
 
-## 9. Keep `go fmt` and `go vet` clean
+## 9. CLI tools: cobra commands, viper configuration
+
+A program that exposes subcommands is a CLI tool — build its command tree with
+`github.com/spf13/cobra` and bind configuration with `github.com/spf13/viper`, keeping the
+flag > env > default precedence from rule 8 (viper adds config files between env and default).
+Commands use `RunE` and return errors — `main` stays the only place that exits — and silence
+cobra's noise on real failures:
+
+```go
+root := &cobra.Command{
+	Use:           "myapp",
+	Short:         "One line on what the tool does.",
+	SilenceUsage:  true, // errors are failures, not usage mistakes
+	SilenceErrors: true, // main logs the error once
+}
+v.SetEnvPrefix("MYAPP")
+v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+v.AutomaticEnv()
+if err := v.BindPFlags(cmd.Flags()); err != nil {
+	return fmt.Errorf("bind flags: %w", err)
+}
+```
+
+Give every command a `Short`, a `Long`, and a runnable `Example`, and expose the root command via
+a `Root()` accessor — the `go-docs` skill generates the CLI reference from it. Keep business
+logic out of `cmd` packages: commands parse and validate input, then call `internal/` packages.
+
+## 10. Keep `go fmt` and `go vet` clean
 
 Code is always `gofmt`-formatted (`go fmt ./...`) and passes `go vet ./...`. Comments state
 constraints and invariants the code cannot express — never what the next line does.
 
 For tests and fuzzing see the `go-testing` skill; for project layout and Makefiles see the
-`go-project` skill; for releases and CI see the `go-release` skill.
+`go-project` skill; for releases and CI see the `go-release` skill; for doc comments and CLI
+reference generation see the `go-docs` skill.
