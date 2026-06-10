@@ -9,8 +9,8 @@
     {
       "name": "golang",
       "source": "./plugins/golang",
-      "description": "Modern Go development — stdlib-first style, table-driven tests and fuzzing, canonical project layout, GoReleaser releases.",
-      "keywords": ["go", "golang", "testing", "goreleaser"]
+      "description": "Modern Go development — stdlib-first style, cobra/viper CLIs, table-driven tests and fuzzing, canonical project layout, doc-comment conventions, GoReleaser releases.",
+      "keywords": ["go", "golang", "testing", "goreleaser", "cobra", "godoc"]
     },
     {
       "name": "terraform",
