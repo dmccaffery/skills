@@ -15,16 +15,16 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - name: Tier 0 static checks
-              run: ./scripts/check-skills.sh
+              run: python3 tools/eval/run_checks.py
             - name: Eval JSON well-formed
               run: |
                   for f in plugins/*/evals/*/*.json; do
                     jq -e . "$f" >/dev/null || { echo "invalid JSON: $f"; exit 1; }
                   done
-            - name: Eval runners compile
-              run: python3 -m py_compile tools/eval/run_triggers.py tools/eval/run_cases.py
+            - name: Eval tooling compiles
+              run: python3 -m py_compile tools/eval/*.py
             - name: Shell scripts parse
-              run: sh -n install.sh scripts/check-skills.sh
+              run: sh -n install.sh
 
     markdown:
         name: markdown lint

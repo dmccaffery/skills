@@ -42,7 +42,7 @@ license: ## inject SPDX license headers (addlicense, pinned in tools/go.mod)
 	@ go tool addlicense -l mit -c $(LICENSE_HOLDER) -s=only $(LICENSE_IGNORE) .
 
 eval-static: ## Tier 0 - frontmatter, manifests, version sync
-	./scripts/check-skills.sh
+	python3 tools/eval/run_checks.py
 
 eval-trigger: ## Tier 1 - trigger accuracy + token usage
 	python3 tools/eval/run_triggers.py --models "$(MODELS)" $(SKILL_FLAG) $(RUNS_FLAG) $(JOBS_FLAG)

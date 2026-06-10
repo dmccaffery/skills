@@ -28,7 +28,7 @@ Every plugin carries two manifests; the repo carries two marketplace manifests:
 
 Rules:
 
-- **Versions stay in sync** between the two plugin manifests (enforced by `scripts/check-skills.sh`). Codex requires
+- **Versions stay in sync** between the two plugin manifests (enforced by `tools/eval/run_checks.py`). Codex requires
   strict semver.
 - Marketplace `source` paths are explicit and `./`-prefixed (`"./plugins/terraform"`). Do not use Claude's
   `metadata.pluginRoot` — Codex fallback-reads Claude's manifest and resolves sources against the repo root.
