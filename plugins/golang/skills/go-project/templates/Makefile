@@ -26,11 +26,10 @@ NPMBIN := ./node_modules/.bin
 
 # Go developer CLIs (addlicense, goreleaser, syft) are pinned in tools/go.mod — a
 # separate module so their dependency graphs never touch the application's go.mod —
-# and invoked directly with `go tool`: compiled into the build cache on first use,
-# no GOBIN, no binaries to manage. `go -C tools tool <name>` runs the tool with its
-# working directory set to tools/, so pass absolute paths ($(CURDIR)/...) to tools
-# that touch files. Tools that must run at the repo root (goreleaser) use
-# `go tool -modfile=tools/go.mod <name>` instead, which stays in the current directory.
+# and invoked with `go tool -modfile=tools/go.mod <name>`: compiled into the build
+# cache on first use, no GOBIN, no binaries to manage. -modfile anchors on the root
+# go.mod and runs the tool in the current directory, so relative paths just work.
+# Do not add a go.work that `use`s tools/ — -modfile cannot be used in workspace mode.
 
 .DEFAULT_GOAL := help
 .PHONY: help pr fmt tidy vet license test fuzz build run snapshot release
@@ -59,7 +58,7 @@ vet: node_modules ## Vet the Go code and lint Markdown (go vet + markdownlint-cl
 	$(NPMBIN)/markdownlint-cli2 "**/*.md"
 
 license: ## Inject license headers into the Go source (addlicense, pinned in tools/go.mod)
-	go -C tools tool addlicense -f "$(CURDIR)/LICENSE" -v "$(CURDIR)/cmd" "$(CURDIR)/internal"
+	go tool -modfile=tools/go.mod addlicense -f LICENSE -v cmd internal
 
 test: ## Run the unit tests (+ fuzz seed corpora)
 	go test ./...

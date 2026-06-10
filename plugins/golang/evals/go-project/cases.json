@@ -11,8 +11,8 @@
       { "type": "regex", "path": "go.mod", "pattern": "^module example\\.com/orderd" },
       { "type": "regex", "path": "tools/go.mod", "pattern": "^module .+/tools" },
       { "type": "regex", "path": "Makefile", "pattern": "^pr:" },
-      { "type": "regex", "path": "Makefile", "pattern": "go (-C tools tool|tool -modfile=tools/go\\.mod)" },
-      { "type": "not_regex", "path": "Makefile", "pattern": "TOOLBIN|tools/\\.bin|GOBIN" },
+      { "type": "regex", "path": "Makefile", "pattern": "go tool -modfile=tools/go\\.mod" },
+      { "type": "not_regex", "path": "Makefile", "pattern": "-C tools tool|TOOLBIN|tools/\\.bin|GOBIN" },
       { "type": "regex", "path": "cmd/orderd/main.go", "pattern": "func run\\(" },
       { "type": "command", "run": "go vet ./...", "requires": "go" },
       { "type": "command", "run": "test -z \"$(gofmt -l cmd)\"", "requires": "gofmt" }
@@ -26,12 +26,12 @@
       "go.mod": "module example.com/pindemo\n\ngo 1.24\n",
       "cmd/app/main.go": "package main\n\nfunc main() {}\n",
       "tools/go.mod": "module example.com/pindemo/tools\n\ngo 1.24\n\ntool github.com/google/addlicense\n",
-      "Makefile": "license:\n\tgo -C tools tool addlicense -f \"$(CURDIR)/LICENSE\" -v \"$(CURDIR)/cmd\" \"$(CURDIR)/internal\"\n"
+      "Makefile": "license:\n\tgo tool -modfile=tools/go.mod addlicense -f LICENSE -v cmd internal\n"
     },
     "assertions": [
       { "type": "regex", "path": "tools/go.mod", "pattern": "goreleaser" },
       { "type": "regex", "path": "Makefile", "pattern": "go tool -modfile=tools/go\\.mod goreleaser" },
-      { "type": "not_regex", "path": "Makefile", "pattern": "TOOLBIN|tools/\\.bin|GOBIN" },
+      { "type": "not_regex", "path": "Makefile", "pattern": "-C tools tool|TOOLBIN|tools/\\.bin|GOBIN" },
       { "type": "not_regex", "path": "go.mod", "pattern": "goreleaser" }
     ]
   }

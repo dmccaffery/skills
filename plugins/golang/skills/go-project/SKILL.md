@@ -49,19 +49,21 @@ tool (
 )
 ```
 
-Add a tool with `go -C tools get -tool <module>@<version>` and invoke it directly with `go tool`
-— no `GOBIN`, no prebuilt binaries: Go compiles the tool into the build cache on first use and
-reuses it after that.
+Add a tool with `go -C tools get -tool <module>@<version>` and invoke it with
+`go tool -modfile=tools/go.mod <name>` — no `GOBIN`, no prebuilt binaries: Go compiles the tool
+into the build cache on first use and reuses it after that.
 
 ```sh
-go -C tools tool addlicense -f "$PWD/LICENSE" -v "$PWD/cmd" "$PWD/internal"
+go tool -modfile=tools/go.mod addlicense -f LICENSE -v cmd internal
 ```
 
-`go -C tools` runs the tool with its working directory set to `tools/`, so pass absolute paths to
-tools that touch files. A tool that must run at the repo root — goreleaser resolves
-`.goreleaser.yaml` and `./cmd/...` against its working directory — is invoked as
-`go tool -modfile=tools/go.mod goreleaser` instead, which stays in the current directory. Never
-add a developer tool to the root `go.mod`, and never run a global or `npx`-downloaded copy.
+`-modfile` points the go command at the tools module while the tool keeps running in the current
+directory, so relative paths work and every tool — including goreleaser, which resolves
+`.goreleaser.yaml` and `./cmd/...` against its working directory — is invoked the same way. The
+flag anchors on the module root, so it needs the root `go.mod` this scaffold already has; a repo
+with no root Go module instead adds a root `go.work` with `use ./tools` and runs plain
+`go tool <name>`. Never combine the two — `-modfile` cannot be used in workspace mode — and never
+add a developer tool to the root `go.mod` or run a global or `npx`-downloaded copy.
 
 ## 4. Create the Makefile with the `pr` gate
 
@@ -69,9 +71,9 @@ Copy [templates/Makefile](templates/Makefile) and set `APP`. It provides:
 
 - `pr` — the full local gate, in order: `license tidy fmt vet test fuzz build snapshot`. It must
   pass before every commit.
-- Direct `go tool` invocations of the pinned CLIs (`go -C tools tool addlicense …`,
-  `go tool -modfile=tools/go.mod goreleaser …`) — the build cache compiles and reuses them, so
-  there is no `GOBIN` and nothing to install.
+- Direct `go tool -modfile=tools/go.mod` invocations of the pinned CLIs (`addlicense`,
+  `goreleaser`) — the build cache compiles and reuses them, so there is no `GOBIN` and nothing to
+  install.
 - Version metadata (`git describe`, short SHA, build date) stamped via `-ldflags -X` into
   `internal/version` — the same import path GoReleaser injects on release (see the `go-release`
   skill).
@@ -86,5 +88,6 @@ them from `node_modules/.bin` (`$(NPMBIN)/…`).
 ## 6. Finish
 
 - Write the first `internal/` package and its tests (`go-style`, `go-testing` skills).
+- Document every package and exported identifier as you go (`go-docs` skill).
 - Wire releases, CI, and Dependabot with the `go-release` skill.
 - Run `make pr` and make sure it passes before committing.
