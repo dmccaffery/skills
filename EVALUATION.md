@@ -16,133 +16,81 @@ marginal context a triggering eval loads), priced at the model's published input
 Cells show an em dash when a model has not been evaluated or counted yet, and `n/a` where the
 provider has not published pricing. Behavioral (Tier 2) runs additionally record the
 harness-reported usage of the live session — total input tokens (including cache writes and
-reads), output tokens, and cost.
+reads), output tokens, and cost. Executed runs also record wall-clock agent runtime ("Avg
+run"/"Run" columns): per-query averages across runs for triggers, per-case agent time
+(grading excluded) for cases — model speed varies widely.
 
-## Anthropic
+## golang
 
-### golang
+### Triggers
 
-#### Triggers
-
-| Model | Passed | Input tokens | Est. input cost (USD) |
-| --- | --- | --- | --- |
-| Claude Haiku 4.5 (`claude-haiku-4-5`) | — | — | — |
-| Claude Sonnet 4.6 (`claude-sonnet-4-6`) | — | — | — |
-| Claude Opus 4.8 (`claude-opus-4-8`) | — | — | — |
-| Claude Fable 5 (`claude-fable-5`) | — | — | — |
-
-#### Cases
-
-| Model | Passed | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| Provider | Model | Passed | Avg run | Input tokens | Est. input cost (USD) |
 | --- | --- | --- | --- | --- | --- |
-| Claude Haiku 4.5 (`claude-haiku-4-5`) | 5/8 | 10,452 | $0.0105 | 1,511,586/23,418 | $0.6284 |
-| Claude Sonnet 4.6 (`claude-sonnet-4-6`) | 7/8 | 10,452 | $0.0314 | 1,505,765/26,369 | $1.7918 |
-| Claude Opus 4.8 (`claude-opus-4-8`) | 7/8 | 14,066 | $0.0703 | 3,106,639/76,702 | $5.5133 |
-| Claude Fable 5 (`claude-fable-5`) | 7/8 | 14,066 | $0.1407 | 3,517,098/69,758 | $10.9844 |
+| Anthropic | Claude Haiku 4.5 (`claude-haiku-4-5`) | 9/13 | 8.5s | 66,448 | $0.0664 |
+| Anthropic | Claude Sonnet 4.6 (`claude-sonnet-4-6`) | 10/13 | 13.2s | 66,448 | $0.1993 |
+| Anthropic | Claude Opus 4.8 (`claude-opus-4-8`) | 11/13 | 15.2s | 89,313 | $0.4466 |
+| Anthropic | Claude Fable 5 (`claude-fable-5`) | — | — | 89,313 | $0.8931 |
+| OpenAI | GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`) | 11/13 | — | — | — |
+| OpenAI | GPT-5.4 Mini (`gpt-5.4-mini`) | 12/13 | — | 57,410 | $0.0431 |
+| OpenAI | GPT-5.4 (`gpt-5.4`) | 13/13 | — | 57,410 | $0.1435 |
+| OpenAI | GPT-5.5 (`gpt-5.5`) | 12/13 | — | 57,410 | $0.2870 |
+| Google | Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`) | 6/13 | — | 14,986 | $0.0037 |
+| Google | Gemini 3 Flash (preview) (`gemini-3-flash-preview`) | 6/13 | — | 14,986 | $0.0075 |
+| Google | Gemini 3.5 Flash (`gemini-3.5-flash`) | 6/13 | — | 14,986 | $0.0225 |
+| Google | Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`) | 6/13 | — | 14,986 | $0.0300 |
 
-### terraform
+### Cases
 
-#### Triggers
+| Provider | Model | Passed | Avg run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Anthropic | Claude Haiku 4.5 (`claude-haiku-4-5`) | 5/8 | — | 10,452 | $0.0105 | 1,511,586/23,418 | $0.6284 |
+| Anthropic | Claude Sonnet 4.6 (`claude-sonnet-4-6`) | 7/8 | — | 10,452 | $0.0314 | 1,505,765/26,369 | $1.7918 |
+| Anthropic | Claude Opus 4.8 (`claude-opus-4-8`) | 7/8 | — | 14,066 | $0.0703 | 3,106,639/76,702 | $5.5133 |
+| Anthropic | Claude Fable 5 (`claude-fable-5`) | 7/8 | — | 14,066 | $0.1407 | 3,517,098/69,758 | $10.9844 |
+| OpenAI | GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`) | — | — | — | — | — | — |
+| OpenAI | GPT-5.4 Mini (`gpt-5.4-mini`) | — | — | — | — | — | — |
+| OpenAI | GPT-5.4 (`gpt-5.4`) | — | — | — | — | — | — |
+| OpenAI | GPT-5.5 (`gpt-5.5`) | — | — | — | — | — | — |
+| Google | Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`) | — | — | — | — | — | — |
+| Google | Gemini 3 Flash (preview) (`gemini-3-flash-preview`) | — | — | — | — | — | — |
+| Google | Gemini 3.5 Flash (`gemini-3.5-flash`) | — | — | — | — | — | — |
+| Google | Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`) | — | — | — | — | — | — |
 
-| Model | Passed | Input tokens | Est. input cost (USD) |
-| --- | --- | --- | --- |
-| Claude Haiku 4.5 (`claude-haiku-4-5`) | 24/35 | 33,924 | $0.0339 |
-| Claude Sonnet 4.6 (`claude-sonnet-4-6`) | 26/35 | 33,924 | $0.1018 |
-| Claude Opus 4.8 (`claude-opus-4-8`) | 26/35 | 45,860 | $0.2293 |
-| Claude Fable 5 (`claude-fable-5`) | 35/35 | 45,860 | $0.4586 |
+## terraform
 
-#### Cases
+### Triggers
 
-| Model | Passed | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| Provider | Model | Passed | Avg run | Input tokens | Est. input cost (USD) |
 | --- | --- | --- | --- | --- | --- |
-| Claude Haiku 4.5 (`claude-haiku-4-5`) | 4/6 | 5,652 | $0.0057 | 2,236,579/16,277 | $0.5998 |
-| Claude Sonnet 4.6 (`claude-sonnet-4-6`) | 6/6 | 5,652 | $0.0170 | 2,343,162/18,648 | $1.6441 |
-| Claude Opus 4.8 (`claude-opus-4-8`) | 6/6 | 7,693 | $0.0385 | 2,615,305/50,682 | $3.9208 |
-| Claude Fable 5 (`claude-fable-5`) | 6/6 | 7,693 | $0.0769 | 2,137,493/29,658 | $6.0687 |
+| Anthropic | Claude Haiku 4.5 (`claude-haiku-4-5`) | — | — | 33,924 | $0.0339 |
+| Anthropic | Claude Sonnet 4.6 (`claude-sonnet-4-6`) | — | — | 33,924 | $0.1018 |
+| Anthropic | Claude Opus 4.8 (`claude-opus-4-8`) | — | — | 45,860 | $0.2293 |
+| Anthropic | Claude Fable 5 (`claude-fable-5`) | — | — | 45,860 | $0.4586 |
+| OpenAI | GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`) | — | — | — | — |
+| OpenAI | GPT-5.4 Mini (`gpt-5.4-mini`) | — | — | 29,022 | $0.0218 |
+| OpenAI | GPT-5.4 (`gpt-5.4`) | — | — | 29,022 | $0.0726 |
+| OpenAI | GPT-5.5 (`gpt-5.5`) | — | — | 29,022 | $0.1451 |
+| Google | Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`) | — | — | — | — |
+| Google | Gemini 3 Flash (preview) (`gemini-3-flash-preview`) | — | — | — | — |
+| Google | Gemini 3.5 Flash (`gemini-3.5-flash`) | — | — | — | — |
+| Google | Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`) | — | — | — | — |
 
-## OpenAI
+### Cases
 
-### golang
-
-#### Triggers
-
-| Model | Passed | Input tokens | Est. input cost (USD) |
-| --- | --- | --- | --- |
-| GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`) | — | — | — |
-| GPT-5.4 Mini (`gpt-5.4-mini`) | — | — | — |
-| GPT-5.4 (`gpt-5.4`) | — | — | — |
-| GPT-5.5 (`gpt-5.5`) | — | — | — |
-
-#### Cases
-
-| Model | Passed | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`) | — | — | — | — | — |
-| GPT-5.4 Mini (`gpt-5.4-mini`) | — | — | — | — | — |
-| GPT-5.4 (`gpt-5.4`) | — | — | — | — | — |
-| GPT-5.5 (`gpt-5.5`) | — | — | — | — | — |
-
-### terraform
-
-#### Triggers
-
-| Model | Passed | Input tokens | Est. input cost (USD) |
-| --- | --- | --- | --- |
-| GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`) | — | — | — |
-| GPT-5.4 Mini (`gpt-5.4-mini`) | — | — | — |
-| GPT-5.4 (`gpt-5.4`) | — | — | — |
-| GPT-5.5 (`gpt-5.5`) | — | — | — |
-
-#### Cases
-
-| Model | Passed | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`) | — | — | — | — | — |
-| GPT-5.4 Mini (`gpt-5.4-mini`) | — | — | — | — | — |
-| GPT-5.4 (`gpt-5.4`) | — | — | — | — | — |
-| GPT-5.5 (`gpt-5.5`) | — | — | — | — | — |
-
-## Google
-
-### golang
-
-#### Triggers
-
-| Model | Passed | Input tokens | Est. input cost (USD) |
-| --- | --- | --- | --- |
-| Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`) | — | — | — |
-| Gemini 3 Flash (preview) (`gemini-3-flash-preview`) | — | — | — |
-| Gemini 3.5 Flash (`gemini-3.5-flash`) | — | — | — |
-| Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`) | — | — | — |
-
-#### Cases
-
-| Model | Passed | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`) | — | — | — | — | — |
-| Gemini 3 Flash (preview) (`gemini-3-flash-preview`) | — | — | — | — | — |
-| Gemini 3.5 Flash (`gemini-3.5-flash`) | — | — | — | — | — |
-| Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`) | — | — | — | — | — |
-
-### terraform
-
-#### Triggers
-
-| Model | Passed | Input tokens | Est. input cost (USD) |
-| --- | --- | --- | --- |
-| Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`) | — | — | — |
-| Gemini 3 Flash (preview) (`gemini-3-flash-preview`) | — | — | — |
-| Gemini 3.5 Flash (`gemini-3.5-flash`) | — | — | — |
-| Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`) | — | — | — |
-
-#### Cases
-
-| Model | Passed | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`) | — | — | — | — | — |
-| Gemini 3 Flash (preview) (`gemini-3-flash-preview`) | — | — | — | — | — |
-| Gemini 3.5 Flash (`gemini-3.5-flash`) | — | — | — | — | — |
-| Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`) | — | — | — | — | — |
+| Provider | Model | Passed | Avg run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Anthropic | Claude Haiku 4.5 (`claude-haiku-4-5`) | 4/6 | — | 5,652 | $0.0057 | 2,236,579/16,277 | $0.5998 |
+| Anthropic | Claude Sonnet 4.6 (`claude-sonnet-4-6`) | 6/6 | — | 5,652 | $0.0170 | 2,343,162/18,648 | $1.6441 |
+| Anthropic | Claude Opus 4.8 (`claude-opus-4-8`) | 6/6 | — | 7,693 | $0.0385 | 2,615,305/50,682 | $3.9208 |
+| Anthropic | Claude Fable 5 (`claude-fable-5`) | 6/6 | — | 7,693 | $0.0769 | 2,137,493/29,658 | $6.0687 |
+| OpenAI | GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`) | — | — | — | — | — | — |
+| OpenAI | GPT-5.4 Mini (`gpt-5.4-mini`) | — | — | — | — | — | — |
+| OpenAI | GPT-5.4 (`gpt-5.4`) | — | — | — | — | — | — |
+| OpenAI | GPT-5.5 (`gpt-5.5`) | — | — | — | — | — | — |
+| Google | Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`) | — | — | — | — | — | — |
+| Google | Gemini 3 Flash (preview) (`gemini-3-flash-preview`) | — | — | — | — | — | — |
+| Google | Gemini 3.5 Flash (`gemini-3.5-flash`) | — | — | — | — | — | — |
+| Google | Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`) | — | — | — | — | — | — |
 
 ## Regenerating
 

@@ -4,15 +4,17 @@
 
 """Generate EVALUATION.md reports from evals-results/*.json (schema 2).
 
-Two levels, both organised as one section per model provider (Anthropic,
-OpenAI, Google) with one row/subsection per model:
+Two levels:
 
-- EVALUATION.md (repo root)            — plugin-level rollup, one triggers
-  table and one cases table per plugin: pass rates, total input tokens,
-  estimated input cost, and (cases) the measured usage of executed runs.
-- plugins/<plugin>/EVALUATION.md       — per-eval detail: every trigger query
-  and behavioral case with its result, token count, and cost; case tables
-  also total the measured usage per model.
+- EVALUATION.md (repo root)            — plugin-level rollup: one section per
+  plugin with a triggers chart and a cases chart, every provider model as a
+  row (pass rates, avg agent runtime, total input tokens, estimated input
+  cost, and (cases) the measured usage of executed runs) so models compare
+  side by side.
+- plugins/<plugin>/EVALUATION.md       — per-eval detail, one section per
+  provider with one subsection per model: every trigger query and behavioral
+  case with its result, token count, and cost; case tables also total the
+  measured usage per model.
 
 evals-results/ is gitignored (raw run data stays local); the EVALUATION.md
 files are the committed record. run_triggers.py and run_cases.py call
@@ -184,44 +186,47 @@ def root_report(layout):
         METHODOLOGY,
         "",
     ]
-    for provider in providers.PROVIDERS.values():
-        lines += [f"## {provider['display']}", ""]
-        for plugin, trigger_skills, case_skills in layout:
-            lines += [
-                f"### {plugin}",
-                "",
-                "#### Triggers",
-                "",
-                "| Model | Passed | Avg run | Input tokens | Est. input cost (USD) |",
-                "| --- | --- | --- | --- | --- |",
-            ]
-            for model in provider["models"]:
-                passed, total, tokens, cost = rollup("triggers", trigger_skills, model["id"])
-                avg = rollup_avg_seconds("triggers", trigger_skills, model["id"])
-                lines.append(
-                    f"| {model['display']} (`{model['id']}`) "
-                    f"| {fmt_frac(passed, total)} | {fmt_secs(avg)} "
-                    f"| {fmt_tokens(tokens)} | {fmt_cost(cost, tokens, model)} |"
-                )
-            lines += [
-                "",
-                "#### Cases",
-                "",
-                "| Model | Passed | Avg run | Input tokens | Est. input cost (USD) "
-                "| Measured tokens (in/out) | Measured cost (USD) |",
-                "| --- | --- | --- | --- | --- | --- | --- |",
-            ]
-            for model in provider["models"]:
-                passed, total, tokens, cost = rollup("cases", case_skills, model["id"])
-                avg = rollup_avg_seconds("cases", case_skills, model["id"])
-                m_in, m_out, m_cost = rollup_measured(case_skills, model["id"])
-                lines.append(
-                    f"| {model['display']} (`{model['id']}`) "
-                    f"| {fmt_frac(passed, total)} | {fmt_secs(avg)} "
-                    f"| {fmt_tokens(tokens)} | {fmt_cost(cost, tokens, model)} "
-                    f"| {fmt_measured_tokens(m_in, m_out)} | {fmt_usd(m_cost)} |"
-                )
-            lines.append("")
+    all_models = [
+        (provider["display"], model)
+        for provider in providers.PROVIDERS.values()
+        for model in provider["models"]
+    ]
+    for plugin, trigger_skills, case_skills in layout:
+        lines += [
+            f"## {plugin}",
+            "",
+            "### Triggers",
+            "",
+            "| Provider | Model | Passed | Avg run | Input tokens | Est. input cost (USD) |",
+            "| --- | --- | --- | --- | --- | --- |",
+        ]
+        for provider_name, model in all_models:
+            passed, total, tokens, cost = rollup("triggers", trigger_skills, model["id"])
+            avg = rollup_avg_seconds("triggers", trigger_skills, model["id"])
+            lines.append(
+                f"| {provider_name} | {model['display']} (`{model['id']}`) "
+                f"| {fmt_frac(passed, total)} | {fmt_secs(avg)} "
+                f"| {fmt_tokens(tokens)} | {fmt_cost(cost, tokens, model)} |"
+            )
+        lines += [
+            "",
+            "### Cases",
+            "",
+            "| Provider | Model | Passed | Avg run | Input tokens | Est. input cost (USD) "
+            "| Measured tokens (in/out) | Measured cost (USD) |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- |",
+        ]
+        for provider_name, model in all_models:
+            passed, total, tokens, cost = rollup("cases", case_skills, model["id"])
+            avg = rollup_avg_seconds("cases", case_skills, model["id"])
+            m_in, m_out, m_cost = rollup_measured(case_skills, model["id"])
+            lines.append(
+                f"| {provider_name} | {model['display']} (`{model['id']}`) "
+                f"| {fmt_frac(passed, total)} | {fmt_secs(avg)} "
+                f"| {fmt_tokens(tokens)} | {fmt_cost(cost, tokens, model)} "
+                f"| {fmt_measured_tokens(m_in, m_out)} | {fmt_usd(m_cost)} |"
+            )
+        lines.append("")
     lines += [REGENERATE, ""]
     return "\n".join(lines)
 

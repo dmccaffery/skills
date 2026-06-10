@@ -16,213 +16,1207 @@ marginal context a triggering eval loads), priced at the model's published input
 Cells show an em dash when a model has not been evaluated or counted yet, and `n/a` where the
 provider has not published pricing. Behavioral (Tier 2) runs additionally record the
 harness-reported usage of the live session — total input tokens (including cache writes and
-reads), output tokens, and cost.
+reads), output tokens, and cost. Executed runs also record wall-clock agent runtime ("Avg
+run"/"Run" columns): per-query averages across runs for triggers, per-case agent time
+(grading excluded) for cases — model speed varies widely.
 
 ## Anthropic
 
 ### Claude Haiku 4.5 (`claude-haiku-4-5`)
 
+#### Triggers — go-project
+
+Last run 2026-06-10T15:30:52+00:00, 3 runs per query.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Scaffold a new Go service called payments | yes | 1.00 | PASS | 3.7s | 1,241 | $0.0012 |
+| Set up a new Go project with cmd and internal layout | yes | 1.00 | PASS | 5.5s | 1,244 | $0.0012 |
+| Add a tools module to pin our Go developer tooling | yes | 0.33 | FAIL | 9.0s | 1,244 | $0.0012 |
+| Create a Makefile for this Go repo with the standard targets | yes | 0.33 | FAIL | 11.0s | 1,246 | $0.0012 |
+| Pin addlicense and goreleaser as developer tools in this Go repo | yes | 0.00 | FAIL | 10.3s | 1,248 | $0.0012 |
+| Restructure this Go repository to the standard layout | yes | 0.67 | PASS | 5.5s | 1,243 | $0.0012 |
+| Where should this shared Go code live — pkg or internal? | yes | 0.00 | FAIL | 12.5s | 1,245 | $0.0012 |
+| Scaffold a new npm package with the usual project files | no | 0.00 | PASS | 11.4s | 1,244 | $0.0012 |
+| Create a new Terraform module with the standard layout | no | 0.00 | PASS | 8.1s | 1,243 | $0.0012 |
+| Set up the GitHub Actions release workflow for this Go repo | no | 0.00 | PASS | 10.9s | 1,244 | $0.0012 |
+| Write a fuzz test for this Go parser | no | 0.00 | PASS | 6.9s | 1,242 | $0.0012 |
+| Initialize a Python project with uv | no | 0.00 | PASS | 9.5s | 1,240 | $0.0012 |
+| Add error wrapping to this Go function | no | 0.00 | PASS | 6.1s | 1,241 | $0.0012 |
+| **Total** | | | **9/13** | **8.5s** | **16,165** | **$0.0162** |
+
+#### Triggers — go-release
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:12:54+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Set up GoReleaser for this Go project | yes | — | — | — | 1,195 | $0.0012 |
+| Add a release workflow that publishes binaries and container images f… | yes | — | — | — | 1,201 | $0.0012 |
+| Stamp the version and commit into the Go binary at build time | yes | — | — | — | 1,198 | $0.0012 |
+| Add GitHub Actions CI for this Go repo | yes | — | — | — | 1,193 | $0.0012 |
+| Configure Dependabot for our Go modules and GitHub Actions | yes | — | — | — | 1,197 | $0.0012 |
+| Publish multi-arch Docker images from our Go release pipeline | yes | — | — | — | 1,197 | $0.0012 |
+| Add SBOM generation to the Go release build | yes | — | — | — | 1,195 | $0.0012 |
+| Set up semantic-release for my npm package | no | — | — | — | 1,194 | $0.0012 |
+| Write a Dockerfile for my Python app | no | — | — | — | 1,193 | $0.0012 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,196 | $0.0012 |
+| Fix the failing Go unit test in CI | no | — | — | — | 1,193 | $0.0012 |
+| Write table-driven tests before we cut the release | no | — | — | — | 1,195 | $0.0012 |
+| Set up release-please for this TypeScript repo | no | — | — | — | 1,195 | $0.0012 |
+| **Total** | | | **—** | **—** | **15,542** | **$0.0155** |
+
+#### Triggers — go-style
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:13:56+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refactor this Go code to wrap errors properly | yes | — | — | — | 1,284 | $0.0013 |
+| Add structured logging to my Go service | yes | — | — | — | 1,281 | $0.0013 |
+| Review this Go package for idiomatic style | yes | — | — | — | 1,283 | $0.0013 |
+| How should I handle errors in this Go function? | yes | — | — | — | 1,284 | $0.0013 |
+| Add a POST endpoint to my Go server using the stdlib router | yes | — | — | — | 1,286 | $0.0013 |
+| Convert these log.Printf calls to slog | yes | — | — | — | 1,283 | $0.0013 |
+| Should this Go interface live in the consumer or the producer package? | yes | — | — | — | 1,287 | $0.0013 |
+| Write table-driven tests for this Go function | no | — | — | — | 1,283 | $0.0013 |
+| Set up GoReleaser for my Go project | no | — | — | — | 1,284 | $0.0013 |
+| Scaffold a new Go service with cmd and internal directories | no | — | — | — | 1,285 | $0.0013 |
+| Refactor this Rust code to use idiomatic error handling | no | — | — | — | 1,288 | $0.0013 |
+| What's new in the latest Go release? | no | — | — | — | 1,283 | $0.0013 |
+| Add structured logging to my Express app | no | — | — | — | 1,281 | $0.0013 |
+| **Total** | | | **—** | **—** | **16,692** | **$0.0167** |
+
+#### Triggers — go-testing
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:14:41+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Write tests for this Go package | yes | — | — | — | 1,385 | $0.0014 |
+| Add table-driven tests for this Go parser | yes | — | — | — | 1,388 | $0.0014 |
+| Add a Go fuzz test for this parsing function | yes | — | — | — | 1,389 | $0.0014 |
+| Test this Go HTTP handler | yes | — | — | — | 1,384 | $0.0014 |
+| How do I run a single fuzz target with go test? | yes | — | — | — | 1,392 | $0.0014 |
+| Review my Go tests — should I be using testify here? | yes | — | — | — | 1,392 | $0.0014 |
+| Add a seed corpus to this Go fuzz target | yes | — | — | — | 1,389 | $0.0014 |
+| Write pytest tests for this module | no | — | — | — | 1,385 | $0.0014 |
+| Refactor this Go function to wrap errors with %w | no | — | — | — | 1,391 | $0.0014 |
+| Set up the GitHub Actions release workflow for our Go repo | no | — | — | — | 1,390 | $0.0014 |
+| Write Jest tests for this React component | no | — | — | — | 1,386 | $0.0014 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,390 | $0.0014 |
+| Why is my JavaScript integration test flaky? | no | — | — | — | 1,388 | $0.0014 |
+| **Total** | | | **—** | **—** | **18,049** | **$0.0180** |
+
 #### Cases — go-project
 
 Last run 2026-06-10T01:55:27+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| project-scaffold | FAIL | 1,294 | $0.0013 | 231,173/3,936 | $0.0917 |
-| pin-tool | FAIL | 1,291 | $0.0013 | 106,571/1,187 | $0.0574 |
-| **Total** | **0/2** | **2,585** | **$0.0026** | **337,744/5,123** | **$0.1491** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| project-scaffold | FAIL | — | 1,294 | $0.0013 | 231,173/3,936 | $0.0917 |
+| pin-tool | FAIL | — | 1,291 | $0.0013 | 106,571/1,187 | $0.0574 |
+| **Total** | **0/2** | **—** | **2,585** | **$0.0026** | **337,744/5,123** | **$0.1491** |
 
 #### Cases — go-release
 
 Last run 2026-06-10T02:14:44+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| goreleaser-setup | FAIL | 1,221 | $0.0012 | 230,581/5,076 | $0.0965 |
-| ci-dependabot | PASS | 1,232 | $0.0012 | 369,850/3,429 | $0.1007 |
-| **Total** | **1/2** | **2,453** | **$0.0025** | **600,431/8,505** | **$0.1973** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| goreleaser-setup | FAIL | — | 1,221 | $0.0012 | 230,581/5,076 | $0.0965 |
+| ci-dependabot | PASS | — | 1,232 | $0.0012 | 369,850/3,429 | $0.1007 |
+| **Total** | **1/2** | **—** | **2,453** | **$0.0025** | **600,431/8,505** | **$0.1973** |
 
 #### Cases — go-style
 
 Last run 2026-06-10T02:35:26+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| wrap-errors-slog | PASS | 1,298 | $0.0013 | 109,229/2,167 | $0.0662 |
-| stdlib-handler | PASS | 1,312 | $0.0013 | 108,680/4,745 | $0.0785 |
-| **Total** | **2/2** | **2,610** | **$0.0026** | **217,909/6,912** | **$0.1447** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| wrap-errors-slog | PASS | — | 1,298 | $0.0013 | 109,229/2,167 | $0.0662 |
+| stdlib-handler | PASS | — | 1,312 | $0.0013 | 108,680/4,745 | $0.0785 |
+| **Total** | **2/2** | **—** | **2,610** | **$0.0026** | **217,909/6,912** | **$0.1447** |
 
 #### Cases — go-testing
 
 Last run 2026-06-10T02:44:27+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| table-driven | PASS | 1,398 | $0.0014 | 106,875/1,157 | $0.0572 |
-| fuzz-target | PASS | 1,406 | $0.0014 | 248,627/1,721 | $0.0802 |
-| **Total** | **2/2** | **2,804** | **$0.0028** | **355,502/2,878** | **$0.1374** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| table-driven | PASS | — | 1,398 | $0.0014 | 106,875/1,157 | $0.0572 |
+| fuzz-target | PASS | — | 1,406 | $0.0014 | 248,627/1,721 | $0.0802 |
+| **Total** | **2/2** | **—** | **2,804** | **$0.0028** | **355,502/2,878** | **$0.1374** |
 
 ### Claude Sonnet 4.6 (`claude-sonnet-4-6`)
+
+#### Triggers — go-project
+
+Last run 2026-06-10T15:33:07+00:00, 3 runs per query.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Scaffold a new Go service called payments | yes | 1.00 | PASS | 5.2s | 1,241 | $0.0037 |
+| Set up a new Go project with cmd and internal layout | yes | 1.00 | PASS | 3.2s | 1,244 | $0.0037 |
+| Add a tools module to pin our Go developer tooling | yes | 1.00 | PASS | 3.5s | 1,244 | $0.0037 |
+| Create a Makefile for this Go repo with the standard targets | yes | 0.67 | PASS | 16.1s | 1,246 | $0.0037 |
+| Pin addlicense and goreleaser as developer tools in this Go repo | yes | 0.33 | FAIL | 16.3s | 1,248 | $0.0037 |
+| Restructure this Go repository to the standard layout | yes | 0.00 | FAIL | 26.9s | 1,243 | $0.0037 |
+| Where should this shared Go code live — pkg or internal? | yes | 0.00 | FAIL | 7.3s | 1,245 | $0.0037 |
+| Scaffold a new npm package with the usual project files | no | 0.00 | PASS | 22.6s | 1,244 | $0.0037 |
+| Create a new Terraform module with the standard layout | no | 0.00 | PASS | 24.8s | 1,243 | $0.0037 |
+| Set up the GitHub Actions release workflow for this Go repo | no | 0.00 | PASS | 12.9s | 1,244 | $0.0037 |
+| Write a fuzz test for this Go parser | no | 0.00 | PASS | 11.2s | 1,242 | $0.0037 |
+| Initialize a Python project with uv | no | 0.00 | PASS | 17.5s | 1,240 | $0.0037 |
+| Add error wrapping to this Go function | no | 0.00 | PASS | 4.1s | 1,241 | $0.0037 |
+| **Total** | | | **10/13** | **13.2s** | **16,165** | **$0.0485** |
+
+#### Triggers — go-release
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:12:54+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Set up GoReleaser for this Go project | yes | — | — | — | 1,195 | $0.0036 |
+| Add a release workflow that publishes binaries and container images f… | yes | — | — | — | 1,201 | $0.0036 |
+| Stamp the version and commit into the Go binary at build time | yes | — | — | — | 1,198 | $0.0036 |
+| Add GitHub Actions CI for this Go repo | yes | — | — | — | 1,193 | $0.0036 |
+| Configure Dependabot for our Go modules and GitHub Actions | yes | — | — | — | 1,197 | $0.0036 |
+| Publish multi-arch Docker images from our Go release pipeline | yes | — | — | — | 1,197 | $0.0036 |
+| Add SBOM generation to the Go release build | yes | — | — | — | 1,195 | $0.0036 |
+| Set up semantic-release for my npm package | no | — | — | — | 1,194 | $0.0036 |
+| Write a Dockerfile for my Python app | no | — | — | — | 1,193 | $0.0036 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,196 | $0.0036 |
+| Fix the failing Go unit test in CI | no | — | — | — | 1,193 | $0.0036 |
+| Write table-driven tests before we cut the release | no | — | — | — | 1,195 | $0.0036 |
+| Set up release-please for this TypeScript repo | no | — | — | — | 1,195 | $0.0036 |
+| **Total** | | | **—** | **—** | **15,542** | **$0.0466** |
+
+#### Triggers — go-style
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:13:56+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refactor this Go code to wrap errors properly | yes | — | — | — | 1,284 | $0.0039 |
+| Add structured logging to my Go service | yes | — | — | — | 1,281 | $0.0038 |
+| Review this Go package for idiomatic style | yes | — | — | — | 1,283 | $0.0038 |
+| How should I handle errors in this Go function? | yes | — | — | — | 1,284 | $0.0039 |
+| Add a POST endpoint to my Go server using the stdlib router | yes | — | — | — | 1,286 | $0.0039 |
+| Convert these log.Printf calls to slog | yes | — | — | — | 1,283 | $0.0038 |
+| Should this Go interface live in the consumer or the producer package? | yes | — | — | — | 1,287 | $0.0039 |
+| Write table-driven tests for this Go function | no | — | — | — | 1,283 | $0.0038 |
+| Set up GoReleaser for my Go project | no | — | — | — | 1,284 | $0.0039 |
+| Scaffold a new Go service with cmd and internal directories | no | — | — | — | 1,285 | $0.0039 |
+| Refactor this Rust code to use idiomatic error handling | no | — | — | — | 1,288 | $0.0039 |
+| What's new in the latest Go release? | no | — | — | — | 1,283 | $0.0038 |
+| Add structured logging to my Express app | no | — | — | — | 1,281 | $0.0038 |
+| **Total** | | | **—** | **—** | **16,692** | **$0.0501** |
+
+#### Triggers — go-testing
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:14:41+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Write tests for this Go package | yes | — | — | — | 1,385 | $0.0042 |
+| Add table-driven tests for this Go parser | yes | — | — | — | 1,388 | $0.0042 |
+| Add a Go fuzz test for this parsing function | yes | — | — | — | 1,389 | $0.0042 |
+| Test this Go HTTP handler | yes | — | — | — | 1,384 | $0.0042 |
+| How do I run a single fuzz target with go test? | yes | — | — | — | 1,392 | $0.0042 |
+| Review my Go tests — should I be using testify here? | yes | — | — | — | 1,392 | $0.0042 |
+| Add a seed corpus to this Go fuzz target | yes | — | — | — | 1,389 | $0.0042 |
+| Write pytest tests for this module | no | — | — | — | 1,385 | $0.0042 |
+| Refactor this Go function to wrap errors with %w | no | — | — | — | 1,391 | $0.0042 |
+| Set up the GitHub Actions release workflow for our Go repo | no | — | — | — | 1,390 | $0.0042 |
+| Write Jest tests for this React component | no | — | — | — | 1,386 | $0.0042 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,390 | $0.0042 |
+| Why is my JavaScript integration test flaky? | no | — | — | — | 1,388 | $0.0042 |
+| **Total** | | | **—** | **—** | **18,049** | **$0.0541** |
 
 #### Cases — go-project
 
 Last run 2026-06-10T01:58:17+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| project-scaffold | PASS | 1,294 | $0.0039 | 210,007/5,792 | $0.2730 |
-| pin-tool | FAIL | 1,291 | $0.0039 | 136,644/3,355 | $0.1966 |
-| **Total** | **1/2** | **2,585** | **$0.0078** | **346,651/9,147** | **$0.4696** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| project-scaffold | PASS | — | 1,294 | $0.0039 | 210,007/5,792 | $0.2730 |
+| pin-tool | FAIL | — | 1,291 | $0.0039 | 136,644/3,355 | $0.1966 |
+| **Total** | **1/2** | **—** | **2,585** | **$0.0078** | **346,651/9,147** | **$0.4696** |
 
 #### Cases — go-release
 
 Last run 2026-06-10T02:18:59+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| goreleaser-setup | PASS | 1,221 | $0.0037 | 374,878/8,275 | $0.4538 |
-| ci-dependabot | PASS | 1,232 | $0.0037 | 192,251/2,075 | $0.1926 |
-| **Total** | **2/2** | **2,453** | **$0.0074** | **567,129/10,350** | **$0.6464** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| goreleaser-setup | PASS | — | 1,221 | $0.0037 | 374,878/8,275 | $0.4538 |
+| ci-dependabot | PASS | — | 1,232 | $0.0037 | 192,251/2,075 | $0.1926 |
+| **Total** | **2/2** | **—** | **2,453** | **$0.0074** | **567,129/10,350** | **$0.6464** |
 
 #### Cases — go-style
 
 Last run 2026-06-10T02:36:52+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| wrap-errors-slog | PASS | 1,298 | $0.0039 | 136,540/2,599 | $0.1821 |
-| stdlib-handler | PASS | 1,312 | $0.0039 | 135,656/1,698 | $0.1642 |
-| **Total** | **2/2** | **2,610** | **$0.0078** | **272,196/4,297** | **$0.3464** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| wrap-errors-slog | PASS | — | 1,298 | $0.0039 | 136,540/2,599 | $0.1821 |
+| stdlib-handler | PASS | — | 1,312 | $0.0039 | 135,656/1,698 | $0.1642 |
+| **Total** | **2/2** | **—** | **2,610** | **$0.0078** | **272,196/4,297** | **$0.3464** |
 
 #### Cases — go-testing
 
 Last run 2026-06-10T02:45:31+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| table-driven | PASS | 1,398 | $0.0042 | 159,758/1,370 | $0.1661 |
-| fuzz-target | PASS | 1,406 | $0.0042 | 160,031/1,205 | $0.1634 |
-| **Total** | **2/2** | **2,804** | **$0.0084** | **319,789/2,575** | **$0.3295** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| table-driven | PASS | — | 1,398 | $0.0042 | 159,758/1,370 | $0.1661 |
+| fuzz-target | PASS | — | 1,406 | $0.0042 | 160,031/1,205 | $0.1634 |
+| **Total** | **2/2** | **—** | **2,804** | **$0.0084** | **319,789/2,575** | **$0.3295** |
 
 ### Claude Opus 4.8 (`claude-opus-4-8`)
+
+#### Triggers — go-project
+
+Last run 2026-06-10T15:35:42+00:00, 3 runs per query.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Scaffold a new Go service called payments | yes | 1.00 | PASS | 6.0s | 1,670 | $0.0083 |
+| Set up a new Go project with cmd and internal layout | yes | 1.00 | PASS | 4.4s | 1,674 | $0.0084 |
+| Add a tools module to pin our Go developer tooling | yes | 1.00 | PASS | 6.2s | 1,674 | $0.0084 |
+| Create a Makefile for this Go repo with the standard targets | yes | 1.00 | PASS | 8.9s | 1,676 | $0.0084 |
+| Pin addlicense and goreleaser as developer tools in this Go repo | yes | 0.00 | FAIL | 21.4s | 1,681 | $0.0084 |
+| Restructure this Go repository to the standard layout | yes | 1.00 | PASS | 7.1s | 1,672 | $0.0084 |
+| Where should this shared Go code live — pkg or internal? | yes | 0.00 | FAIL | 21.8s | 1,675 | $0.0084 |
+| Scaffold a new npm package with the usual project files | no | 0.00 | PASS | 32.7s | 1,673 | $0.0084 |
+| Create a new Terraform module with the standard layout | no | 0.00 | PASS | 16.8s | 1,672 | $0.0084 |
+| Set up the GitHub Actions release workflow for this Go repo | no | 0.00 | PASS | 16.4s | 1,678 | $0.0084 |
+| Write a fuzz test for this Go parser | no | 0.00 | PASS | 15.8s | 1,671 | $0.0084 |
+| Initialize a Python project with uv | no | 0.00 | PASS | 20.4s | 1,668 | $0.0083 |
+| Add error wrapping to this Go function | no | 0.00 | PASS | 19.1s | 1,669 | $0.0083 |
+| **Total** | | | **11/13** | **15.2s** | **21,753** | **$0.1088** |
+
+#### Triggers — go-release
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:12:54+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Set up GoReleaser for this Go project | yes | — | — | — | 1,665 | $0.0083 |
+| Add a release workflow that publishes binaries and container images f… | yes | — | — | — | 1,673 | $0.0084 |
+| Stamp the version and commit into the Go binary at build time | yes | — | — | — | 1,669 | $0.0083 |
+| Add GitHub Actions CI for this Go repo | yes | — | — | — | 1,668 | $0.0083 |
+| Configure Dependabot for our Go modules and GitHub Actions | yes | — | — | — | 1,673 | $0.0084 |
+| Publish multi-arch Docker images from our Go release pipeline | yes | — | — | — | 1,672 | $0.0084 |
+| Add SBOM generation to the Go release build | yes | — | — | — | 1,665 | $0.0083 |
+| Set up semantic-release for my npm package | no | — | — | — | 1,664 | $0.0083 |
+| Write a Dockerfile for my Python app | no | — | — | — | 1,665 | $0.0083 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,667 | $0.0083 |
+| Fix the failing Go unit test in CI | no | — | — | — | 1,665 | $0.0083 |
+| Write table-driven tests before we cut the release | no | — | — | — | 1,665 | $0.0083 |
+| Set up release-please for this TypeScript repo | no | — | — | — | 1,666 | $0.0083 |
+| **Total** | | | **—** | **—** | **21,677** | **$0.1084** |
+
+#### Triggers — go-style
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:13:56+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refactor this Go code to wrap errors properly | yes | — | — | — | 1,716 | $0.0086 |
+| Add structured logging to my Go service | yes | — | — | — | 1,711 | $0.0086 |
+| Review this Go package for idiomatic style | yes | — | — | — | 1,713 | $0.0086 |
+| How should I handle errors in this Go function? | yes | — | — | — | 1,713 | $0.0086 |
+| Add a POST endpoint to my Go server using the stdlib router | yes | — | — | — | 1,721 | $0.0086 |
+| Convert these log.Printf calls to slog | yes | — | — | — | 1,714 | $0.0086 |
+| Should this Go interface live in the consumer or the producer package? | yes | — | — | — | 1,719 | $0.0086 |
+| Write table-driven tests for this Go function | no | — | — | — | 1,713 | $0.0086 |
+| Set up GoReleaser for my Go project | no | — | — | — | 1,714 | $0.0086 |
+| Scaffold a new Go service with cmd and internal directories | no | — | — | — | 1,719 | $0.0086 |
+| Refactor this Rust code to use idiomatic error handling | no | — | — | — | 1,719 | $0.0086 |
+| What's new in the latest Go release? | no | — | — | — | 1,711 | $0.0086 |
+| Add structured logging to my Express app | no | — | — | — | 1,711 | $0.0086 |
+| **Total** | | | **—** | **—** | **22,294** | **$0.1115** |
+
+#### Triggers — go-testing
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:14:41+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Write tests for this Go package | yes | — | — | — | 1,809 | $0.0090 |
+| Add table-driven tests for this Go parser | yes | — | — | — | 1,814 | $0.0091 |
+| Add a Go fuzz test for this parsing function | yes | — | — | — | 1,816 | $0.0091 |
+| Test this Go HTTP handler | yes | — | — | — | 1,811 | $0.0091 |
+| How do I run a single fuzz target with go test? | yes | — | — | — | 1,815 | $0.0091 |
+| Review my Go tests — should I be using testify here? | yes | — | — | — | 1,816 | $0.0091 |
+| Add a seed corpus to this Go fuzz target | yes | — | — | — | 1,817 | $0.0091 |
+| Write pytest tests for this module | no | — | — | — | 1,810 | $0.0091 |
+| Refactor this Go function to wrap errors with %w | no | — | — | — | 1,817 | $0.0091 |
+| Set up the GitHub Actions release workflow for our Go repo | no | — | — | — | 1,821 | $0.0091 |
+| Write Jest tests for this React component | no | — | — | — | 1,811 | $0.0091 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,816 | $0.0091 |
+| Why is my JavaScript integration test flaky? | no | — | — | — | 1,816 | $0.0091 |
+| **Total** | | | **—** | **—** | **23,589** | **$0.1179** |
 
 #### Cases — go-project
 
 Last run 2026-06-10T02:06:47+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| project-scaffold | FAIL | 1,746 | $0.0087 | 1,125,922/26,363 | $1.7240 |
-| pin-tool | PASS | 1,739 | $0.0087 | 184,085/6,166 | $0.4606 |
-| **Total** | **1/2** | **3,485** | **$0.0174** | **1,310,007/32,529** | **$2.1846** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| project-scaffold | FAIL | — | 1,746 | $0.0087 | 1,125,922/26,363 | $1.7240 |
+| pin-tool | PASS | — | 1,739 | $0.0087 | 184,085/6,166 | $0.4606 |
+| **Total** | **1/2** | **—** | **3,485** | **$0.0174** | **1,310,007/32,529** | **$2.1846** |
 
 #### Cases — go-release
 
 Last run 2026-06-10T02:25:20+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| goreleaser-setup | PASS | 1,704 | $0.0085 | 870,079/20,736 | $1.2843 |
-| ci-dependabot | PASS | 1,725 | $0.0086 | 140,567/3,341 | $0.3450 |
-| **Total** | **2/2** | **3,429** | **$0.0171** | **1,010,646/24,077** | **$1.6293** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| goreleaser-setup | PASS | — | 1,704 | $0.0085 | 870,079/20,736 | $1.2843 |
+| ci-dependabot | PASS | — | 1,725 | $0.0086 | 140,567/3,341 | $0.3450 |
+| **Total** | **2/2** | **—** | **3,429** | **$0.0171** | **1,010,646/24,077** | **$1.6293** |
 
 #### Cases — go-style
 
 Last run 2026-06-10T02:39:56+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| wrap-errors-slog | PASS | 1,730 | $0.0086 | 141,026/4,112 | $0.3612 |
-| stdlib-handler | PASS | 1,753 | $0.0088 | 199,865/10,547 | $0.6077 |
-| **Total** | **2/2** | **3,483** | **$0.0174** | **340,891/14,659** | **$0.9688** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| wrap-errors-slog | PASS | — | 1,730 | $0.0086 | 141,026/4,112 | $0.3612 |
+| stdlib-handler | PASS | — | 1,753 | $0.0088 | 199,865/10,547 | $0.6077 |
+| **Total** | **2/2** | **—** | **3,483** | **$0.0174** | **340,891/14,659** | **$0.9688** |
 
 #### Cases — go-testing
 
 Last run 2026-06-10T02:47:38+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| table-driven | PASS | 1,827 | $0.0091 | 192,065/2,468 | $0.3412 |
-| fuzz-target | PASS | 1,842 | $0.0092 | 253,030/2,969 | $0.3895 |
-| **Total** | **2/2** | **3,669** | **$0.0183** | **445,095/5,437** | **$0.7306** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| table-driven | PASS | — | 1,827 | $0.0091 | 192,065/2,468 | $0.3412 |
+| fuzz-target | PASS | — | 1,842 | $0.0092 | 253,030/2,969 | $0.3895 |
+| **Total** | **2/2** | **—** | **3,669** | **$0.0183** | **445,095/5,437** | **$0.7306** |
 
 ### Claude Fable 5 (`claude-fable-5`)
+
+#### Triggers — go-project
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:12:09+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Scaffold a new Go service called payments | yes | — | — | — | 1,670 | $0.0167 |
+| Set up a new Go project with cmd and internal layout | yes | — | — | — | 1,674 | $0.0167 |
+| Add a tools module to pin our Go developer tooling | yes | — | — | — | 1,674 | $0.0167 |
+| Create a Makefile for this Go repo with the standard targets | yes | — | — | — | 1,676 | $0.0168 |
+| Pin addlicense and goreleaser as developer tools in this Go repo | yes | — | — | — | 1,681 | $0.0168 |
+| Restructure this Go repository to the standard layout | yes | — | — | — | 1,672 | $0.0167 |
+| Where should this shared Go code live — pkg or internal? | yes | — | — | — | 1,675 | $0.0168 |
+| Scaffold a new npm package with the usual project files | no | — | — | — | 1,673 | $0.0167 |
+| Create a new Terraform module with the standard layout | no | — | — | — | 1,672 | $0.0167 |
+| Set up the GitHub Actions release workflow for this Go repo | no | — | — | — | 1,678 | $0.0168 |
+| Write a fuzz test for this Go parser | no | — | — | — | 1,671 | $0.0167 |
+| Initialize a Python project with uv | no | — | — | — | 1,668 | $0.0167 |
+| Add error wrapping to this Go function | no | — | — | — | 1,669 | $0.0167 |
+| **Total** | | | **—** | **—** | **21,753** | **$0.2175** |
+
+#### Triggers — go-release
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:12:54+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Set up GoReleaser for this Go project | yes | — | — | — | 1,665 | $0.0167 |
+| Add a release workflow that publishes binaries and container images f… | yes | — | — | — | 1,673 | $0.0167 |
+| Stamp the version and commit into the Go binary at build time | yes | — | — | — | 1,669 | $0.0167 |
+| Add GitHub Actions CI for this Go repo | yes | — | — | — | 1,668 | $0.0167 |
+| Configure Dependabot for our Go modules and GitHub Actions | yes | — | — | — | 1,673 | $0.0167 |
+| Publish multi-arch Docker images from our Go release pipeline | yes | — | — | — | 1,672 | $0.0167 |
+| Add SBOM generation to the Go release build | yes | — | — | — | 1,665 | $0.0167 |
+| Set up semantic-release for my npm package | no | — | — | — | 1,664 | $0.0166 |
+| Write a Dockerfile for my Python app | no | — | — | — | 1,665 | $0.0167 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,667 | $0.0167 |
+| Fix the failing Go unit test in CI | no | — | — | — | 1,665 | $0.0167 |
+| Write table-driven tests before we cut the release | no | — | — | — | 1,665 | $0.0167 |
+| Set up release-please for this TypeScript repo | no | — | — | — | 1,666 | $0.0167 |
+| **Total** | | | **—** | **—** | **21,677** | **$0.2168** |
+
+#### Triggers — go-style
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:13:57+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refactor this Go code to wrap errors properly | yes | — | — | — | 1,716 | $0.0172 |
+| Add structured logging to my Go service | yes | — | — | — | 1,711 | $0.0171 |
+| Review this Go package for idiomatic style | yes | — | — | — | 1,713 | $0.0171 |
+| How should I handle errors in this Go function? | yes | — | — | — | 1,713 | $0.0171 |
+| Add a POST endpoint to my Go server using the stdlib router | yes | — | — | — | 1,721 | $0.0172 |
+| Convert these log.Printf calls to slog | yes | — | — | — | 1,714 | $0.0171 |
+| Should this Go interface live in the consumer or the producer package? | yes | — | — | — | 1,719 | $0.0172 |
+| Write table-driven tests for this Go function | no | — | — | — | 1,713 | $0.0171 |
+| Set up GoReleaser for my Go project | no | — | — | — | 1,714 | $0.0171 |
+| Scaffold a new Go service with cmd and internal directories | no | — | — | — | 1,719 | $0.0172 |
+| Refactor this Rust code to use idiomatic error handling | no | — | — | — | 1,719 | $0.0172 |
+| What's new in the latest Go release? | no | — | — | — | 1,711 | $0.0171 |
+| Add structured logging to my Express app | no | — | — | — | 1,711 | $0.0171 |
+| **Total** | | | **—** | **—** | **22,294** | **$0.2229** |
+
+#### Triggers — go-testing
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:14:41+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Write tests for this Go package | yes | — | — | — | 1,809 | $0.0181 |
+| Add table-driven tests for this Go parser | yes | — | — | — | 1,814 | $0.0181 |
+| Add a Go fuzz test for this parsing function | yes | — | — | — | 1,816 | $0.0182 |
+| Test this Go HTTP handler | yes | — | — | — | 1,811 | $0.0181 |
+| How do I run a single fuzz target with go test? | yes | — | — | — | 1,815 | $0.0181 |
+| Review my Go tests — should I be using testify here? | yes | — | — | — | 1,816 | $0.0182 |
+| Add a seed corpus to this Go fuzz target | yes | — | — | — | 1,817 | $0.0182 |
+| Write pytest tests for this module | no | — | — | — | 1,810 | $0.0181 |
+| Refactor this Go function to wrap errors with %w | no | — | — | — | 1,817 | $0.0182 |
+| Set up the GitHub Actions release workflow for our Go repo | no | — | — | — | 1,821 | $0.0182 |
+| Write Jest tests for this React component | no | — | — | — | 1,811 | $0.0181 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,816 | $0.0182 |
+| Why is my JavaScript integration test flaky? | no | — | — | — | 1,816 | $0.0182 |
+| **Total** | | | **—** | **—** | **23,589** | **$0.2359** |
 
 #### Cases — go-project
 
 Last run 2026-06-10T02:13:00+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| project-scaffold | FAIL | 1,746 | $0.0175 | 979,930/16,361 | $2.5326 |
-| pin-tool | PASS | 1,739 | $0.0174 | 180,451/3,587 | $0.7857 |
-| **Total** | **1/2** | **3,485** | **$0.0348** | **1,160,381/19,948** | **$3.3183** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| project-scaffold | FAIL | — | 1,746 | $0.0175 | 979,930/16,361 | $2.5326 |
+| pin-tool | PASS | — | 1,739 | $0.0174 | 180,451/3,587 | $0.7857 |
+| **Total** | **1/2** | **—** | **3,485** | **$0.0348** | **1,160,381/19,948** | **$3.3183** |
 
 #### Cases — go-release
 
 Last run 2026-06-10T02:34:28+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| goreleaser-setup | PASS | 1,704 | $0.0170 | 1,211,073/27,741 | $3.4174 |
-| ci-dependabot | PASS | 1,725 | $0.0173 | 114,615/2,942 | $0.6456 |
-| **Total** | **2/2** | **3,429** | **$0.0343** | **1,325,688/30,683** | **$4.0630** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| goreleaser-setup | PASS | — | 1,704 | $0.0170 | 1,211,073/27,741 | $3.4174 |
+| ci-dependabot | PASS | — | 1,725 | $0.0173 | 114,615/2,942 | $0.6456 |
+| **Total** | **2/2** | **—** | **3,429** | **$0.0343** | **1,325,688/30,683** | **$4.0630** |
 
 #### Cases — go-style
 
 Last run 2026-06-10T02:43:37+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| wrap-errors-slog | PASS | 1,730 | $0.0173 | 228,954/2,681 | $0.7369 |
-| stdlib-handler | PASS | 1,753 | $0.0175 | 336,837/10,108 | $1.3054 |
-| **Total** | **2/2** | **3,483** | **$0.0348** | **565,791/12,789** | **$2.0423** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| wrap-errors-slog | PASS | — | 1,730 | $0.0173 | 228,954/2,681 | $0.7369 |
+| stdlib-handler | PASS | — | 1,753 | $0.0175 | 336,837/10,108 | $1.3054 |
+| **Total** | **2/2** | **—** | **3,483** | **$0.0348** | **565,791/12,789** | **$2.0423** |
 
 #### Cases — go-testing
 
 Last run 2026-06-10T02:50:17+00:00.
 
-| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
-| --- | --- | --- | --- | --- | --- |
-| table-driven | PASS | 1,827 | $0.0183 | 233,680/3,142 | $0.7824 |
-| fuzz-target | PASS | 1,842 | $0.0184 | 231,558/3,196 | $0.7784 |
-| **Total** | **2/2** | **3,669** | **$0.0367** | **465,238/6,338** | **$1.5607** |
+| Case | Result | Run | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| table-driven | PASS | — | 1,827 | $0.0183 | 233,680/3,142 | $0.7824 |
+| fuzz-target | PASS | — | 1,842 | $0.0184 | 231,558/3,196 | $0.7784 |
+| **Total** | **2/2** | **—** | **3,669** | **$0.0367** | **465,238/6,338** | **$1.5607** |
 
 ## OpenAI
 
 ### GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`)
 
-No results recorded for this model yet — see [Regenerating](#regenerating).
+#### Triggers — go-project
+
+Last run 2026-06-10T14:16:21+00:00, 3 runs per query.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Scaffold a new Go service called payments | yes | 1.00 | PASS | — | — | — |
+| Set up a new Go project with cmd and internal layout | yes | 1.00 | PASS | — | — | — |
+| Add a tools module to pin our Go developer tooling | yes | 1.00 | PASS | — | — | — |
+| Create a Makefile for this Go repo with the standard targets | yes | 0.67 | PASS | — | — | — |
+| Pin addlicense and goreleaser as developer tools in this Go repo | yes | 0.00 | FAIL | — | — | — |
+| Restructure this Go repository to the standard layout | yes | 1.00 | PASS | — | — | — |
+| Where should this shared Go code live — pkg or internal? | yes | 0.00 | FAIL | — | — | — |
+| Scaffold a new npm package with the usual project files | no | 0.00 | PASS | — | — | — |
+| Create a new Terraform module with the standard layout | no | 0.00 | PASS | — | — | — |
+| Set up the GitHub Actions release workflow for this Go repo | no | 0.00 | PASS | — | — | — |
+| Write a fuzz test for this Go parser | no | 0.00 | PASS | — | — | — |
+| Initialize a Python project with uv | no | 0.00 | PASS | — | — | — |
+| Add error wrapping to this Go function | no | 0.00 | PASS | — | — | — |
+| **Total** | | | **11/13** | **—** | **—** | **—** |
+
+#### Triggers — go-release
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:13:56+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Set up GoReleaser for this Go project | yes | — | — | — | — | — |
+| Add a release workflow that publishes binaries and container images f… | yes | — | — | — | — | — |
+| Stamp the version and commit into the Go binary at build time | yes | — | — | — | — | — |
+| Add GitHub Actions CI for this Go repo | yes | — | — | — | — | — |
+| Configure Dependabot for our Go modules and GitHub Actions | yes | — | — | — | — | — |
+| Publish multi-arch Docker images from our Go release pipeline | yes | — | — | — | — | — |
+| Add SBOM generation to the Go release build | yes | — | — | — | — | — |
+| Set up semantic-release for my npm package | no | — | — | — | — | — |
+| Write a Dockerfile for my Python app | no | — | — | — | — | — |
+| Scaffold a new Go project with a Makefile | no | — | — | — | — | — |
+| Fix the failing Go unit test in CI | no | — | — | — | — | — |
+| Write table-driven tests before we cut the release | no | — | — | — | — | — |
+| Set up release-please for this TypeScript repo | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
+
+#### Triggers — go-style
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:14:41+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refactor this Go code to wrap errors properly | yes | — | — | — | — | — |
+| Add structured logging to my Go service | yes | — | — | — | — | — |
+| Review this Go package for idiomatic style | yes | — | — | — | — | — |
+| How should I handle errors in this Go function? | yes | — | — | — | — | — |
+| Add a POST endpoint to my Go server using the stdlib router | yes | — | — | — | — | — |
+| Convert these log.Printf calls to slog | yes | — | — | — | — | — |
+| Should this Go interface live in the consumer or the producer package? | yes | — | — | — | — | — |
+| Write table-driven tests for this Go function | no | — | — | — | — | — |
+| Set up GoReleaser for my Go project | no | — | — | — | — | — |
+| Scaffold a new Go service with cmd and internal directories | no | — | — | — | — | — |
+| Refactor this Rust code to use idiomatic error handling | no | — | — | — | — | — |
+| What's new in the latest Go release? | no | — | — | — | — | — |
+| Add structured logging to my Express app | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
+
+#### Triggers — go-testing
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:15:32+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Write tests for this Go package | yes | — | — | — | — | — |
+| Add table-driven tests for this Go parser | yes | — | — | — | — | — |
+| Add a Go fuzz test for this parsing function | yes | — | — | — | — | — |
+| Test this Go HTTP handler | yes | — | — | — | — | — |
+| How do I run a single fuzz target with go test? | yes | — | — | — | — | — |
+| Review my Go tests — should I be using testify here? | yes | — | — | — | — | — |
+| Add a seed corpus to this Go fuzz target | yes | — | — | — | — | — |
+| Write pytest tests for this module | no | — | — | — | — | — |
+| Refactor this Go function to wrap errors with %w | no | — | — | — | — | — |
+| Set up the GitHub Actions release workflow for our Go repo | no | — | — | — | — | — |
+| Write Jest tests for this React component | no | — | — | — | — | — |
+| Scaffold a new Go project with a Makefile | no | — | — | — | — | — |
+| Why is my JavaScript integration test flaky? | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
 
 ### GPT-5.4 Mini (`gpt-5.4-mini`)
 
-No results recorded for this model yet — see [Regenerating](#regenerating).
+#### Triggers — go-project
+
+Last run 2026-06-10T14:39:13+00:00, 3 runs per query.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Scaffold a new Go service called payments | yes | 1.00 | PASS | — | 1,111 | $0.0008 |
+| Set up a new Go project with cmd and internal layout | yes | 1.00 | PASS | — | 1,114 | $0.0008 |
+| Add a tools module to pin our Go developer tooling | yes | 1.00 | PASS | — | 1,113 | $0.0008 |
+| Create a Makefile for this Go repo with the standard targets | yes | 0.67 | PASS | — | 1,115 | $0.0008 |
+| Pin addlicense and goreleaser as developer tools in this Go repo | yes | 1.00 | PASS | — | 1,117 | $0.0008 |
+| Restructure this Go repository to the standard layout | yes | 1.00 | PASS | — | 1,112 | $0.0008 |
+| Where should this shared Go code live — pkg or internal? | yes | 0.00 | FAIL | — | 1,115 | $0.0008 |
+| Scaffold a new npm package with the usual project files | no | 0.00 | PASS | — | 1,114 | $0.0008 |
+| Create a new Terraform module with the standard layout | no | 0.00 | PASS | — | 1,112 | $0.0008 |
+| Set up the GitHub Actions release workflow for this Go repo | no | 0.33 | PASS | — | 1,115 | $0.0008 |
+| Write a fuzz test for this Go parser | no | 0.00 | PASS | — | 1,111 | $0.0008 |
+| Initialize a Python project with uv | no | 0.00 | PASS | — | 1,109 | $0.0008 |
+| Add error wrapping to this Go function | no | 0.00 | PASS | — | 1,110 | $0.0008 |
+| **Total** | | | **12/13** | **—** | **14,468** | **$0.0109** |
+
+#### Triggers — go-release
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:13:56+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Set up GoReleaser for this Go project | yes | — | — | — | 1,061 | $0.0008 |
+| Add a release workflow that publishes binaries and container images f… | yes | — | — | — | 1,065 | $0.0008 |
+| Stamp the version and commit into the Go binary at build time | yes | — | — | — | 1,063 | $0.0008 |
+| Add GitHub Actions CI for this Go repo | yes | — | — | — | 1,060 | $0.0008 |
+| Configure Dependabot for our Go modules and GitHub Actions | yes | — | — | — | 1,062 | $0.0008 |
+| Publish multi-arch Docker images from our Go release pipeline | yes | — | — | — | 1,062 | $0.0008 |
+| Add SBOM generation to the Go release build | yes | — | — | — | 1,060 | $0.0008 |
+| Set up semantic-release for my npm package | no | — | — | — | 1,059 | $0.0008 |
+| Write a Dockerfile for my Python app | no | — | — | — | 1,059 | $0.0008 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,061 | $0.0008 |
+| Fix the failing Go unit test in CI | no | — | — | — | 1,059 | $0.0008 |
+| Write table-driven tests before we cut the release | no | — | — | — | 1,060 | $0.0008 |
+| Set up release-please for this TypeScript repo | no | — | — | — | 1,061 | $0.0008 |
+| **Total** | | | **—** | **—** | **13,792** | **$0.0103** |
+
+#### Triggers — go-style
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:14:41+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refactor this Go code to wrap errors properly | yes | — | — | — | 1,090 | $0.0008 |
+| Add structured logging to my Go service | yes | — | — | — | 1,088 | $0.0008 |
+| Review this Go package for idiomatic style | yes | — | — | — | 1,089 | $0.0008 |
+| How should I handle errors in this Go function? | yes | — | — | — | 1,091 | $0.0008 |
+| Add a POST endpoint to my Go server using the stdlib router | yes | — | — | — | 1,094 | $0.0008 |
+| Convert these log.Printf calls to slog | yes | — | — | — | 1,088 | $0.0008 |
+| Should this Go interface live in the consumer or the producer package? | yes | — | — | — | 1,094 | $0.0008 |
+| Write table-driven tests for this Go function | no | — | — | — | 1,089 | $0.0008 |
+| Set up GoReleaser for my Go project | no | — | — | — | 1,091 | $0.0008 |
+| Scaffold a new Go service with cmd and internal directories | no | — | — | — | 1,092 | $0.0008 |
+| Refactor this Rust code to use idiomatic error handling | no | — | — | — | 1,092 | $0.0008 |
+| What's new in the latest Go release? | no | — | — | — | 1,089 | $0.0008 |
+| Add structured logging to my Express app | no | — | — | — | 1,088 | $0.0008 |
+| **Total** | | | **—** | **—** | **14,175** | **$0.0106** |
+
+#### Triggers — go-testing
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:15:32+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Write tests for this Go package | yes | — | — | — | 1,149 | $0.0009 |
+| Add table-driven tests for this Go parser | yes | — | — | — | 1,151 | $0.0009 |
+| Add a Go fuzz test for this parsing function | yes | — | — | — | 1,152 | $0.0009 |
+| Test this Go HTTP handler | yes | — | — | — | 1,148 | $0.0009 |
+| How do I run a single fuzz target with go test? | yes | — | — | — | 1,155 | $0.0009 |
+| Review my Go tests — should I be using testify here? | yes | — | — | — | 1,155 | $0.0009 |
+| Add a seed corpus to this Go fuzz target | yes | — | — | — | 1,152 | $0.0009 |
+| Write pytest tests for this module | no | — | — | — | 1,149 | $0.0009 |
+| Refactor this Go function to wrap errors with %w | no | — | — | — | 1,154 | $0.0009 |
+| Set up the GitHub Actions release workflow for our Go repo | no | — | — | — | 1,155 | $0.0009 |
+| Write Jest tests for this React component | no | — | — | — | 1,150 | $0.0009 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,153 | $0.0009 |
+| Why is my JavaScript integration test flaky? | no | — | — | — | 1,152 | $0.0009 |
+| **Total** | | | **—** | **—** | **14,975** | **$0.0112** |
 
 ### GPT-5.4 (`gpt-5.4`)
 
-No results recorded for this model yet — see [Regenerating](#regenerating).
+#### Triggers — go-project
+
+Last run 2026-06-10T14:59:59+00:00, 3 runs per query.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Scaffold a new Go service called payments | yes | 1.00 | PASS | — | 1,111 | $0.0028 |
+| Set up a new Go project with cmd and internal layout | yes | 1.00 | PASS | — | 1,114 | $0.0028 |
+| Add a tools module to pin our Go developer tooling | yes | 1.00 | PASS | — | 1,113 | $0.0028 |
+| Create a Makefile for this Go repo with the standard targets | yes | 1.00 | PASS | — | 1,115 | $0.0028 |
+| Pin addlicense and goreleaser as developer tools in this Go repo | yes | 1.00 | PASS | — | 1,117 | $0.0028 |
+| Restructure this Go repository to the standard layout | yes | 1.00 | PASS | — | 1,112 | $0.0028 |
+| Where should this shared Go code live — pkg or internal? | yes | 0.67 | PASS | — | 1,115 | $0.0028 |
+| Scaffold a new npm package with the usual project files | no | 0.00 | PASS | — | 1,114 | $0.0028 |
+| Create a new Terraform module with the standard layout | no | 0.00 | PASS | — | 1,112 | $0.0028 |
+| Set up the GitHub Actions release workflow for this Go repo | no | 0.00 | PASS | — | 1,115 | $0.0028 |
+| Write a fuzz test for this Go parser | no | 0.00 | PASS | — | 1,111 | $0.0028 |
+| Initialize a Python project with uv | no | 0.00 | PASS | — | 1,109 | $0.0028 |
+| Add error wrapping to this Go function | no | 0.00 | PASS | — | 1,110 | $0.0028 |
+| **Total** | | | **13/13** | **—** | **14,468** | **$0.0362** |
+
+#### Triggers — go-release
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:13:56+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Set up GoReleaser for this Go project | yes | — | — | — | 1,061 | $0.0027 |
+| Add a release workflow that publishes binaries and container images f… | yes | — | — | — | 1,065 | $0.0027 |
+| Stamp the version and commit into the Go binary at build time | yes | — | — | — | 1,063 | $0.0027 |
+| Add GitHub Actions CI for this Go repo | yes | — | — | — | 1,060 | $0.0027 |
+| Configure Dependabot for our Go modules and GitHub Actions | yes | — | — | — | 1,062 | $0.0027 |
+| Publish multi-arch Docker images from our Go release pipeline | yes | — | — | — | 1,062 | $0.0027 |
+| Add SBOM generation to the Go release build | yes | — | — | — | 1,060 | $0.0027 |
+| Set up semantic-release for my npm package | no | — | — | — | 1,059 | $0.0026 |
+| Write a Dockerfile for my Python app | no | — | — | — | 1,059 | $0.0026 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,061 | $0.0027 |
+| Fix the failing Go unit test in CI | no | — | — | — | 1,059 | $0.0026 |
+| Write table-driven tests before we cut the release | no | — | — | — | 1,060 | $0.0027 |
+| Set up release-please for this TypeScript repo | no | — | — | — | 1,061 | $0.0027 |
+| **Total** | | | **—** | **—** | **13,792** | **$0.0345** |
+
+#### Triggers — go-style
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:14:41+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refactor this Go code to wrap errors properly | yes | — | — | — | 1,090 | $0.0027 |
+| Add structured logging to my Go service | yes | — | — | — | 1,088 | $0.0027 |
+| Review this Go package for idiomatic style | yes | — | — | — | 1,089 | $0.0027 |
+| How should I handle errors in this Go function? | yes | — | — | — | 1,091 | $0.0027 |
+| Add a POST endpoint to my Go server using the stdlib router | yes | — | — | — | 1,094 | $0.0027 |
+| Convert these log.Printf calls to slog | yes | — | — | — | 1,088 | $0.0027 |
+| Should this Go interface live in the consumer or the producer package? | yes | — | — | — | 1,094 | $0.0027 |
+| Write table-driven tests for this Go function | no | — | — | — | 1,089 | $0.0027 |
+| Set up GoReleaser for my Go project | no | — | — | — | 1,091 | $0.0027 |
+| Scaffold a new Go service with cmd and internal directories | no | — | — | — | 1,092 | $0.0027 |
+| Refactor this Rust code to use idiomatic error handling | no | — | — | — | 1,092 | $0.0027 |
+| What's new in the latest Go release? | no | — | — | — | 1,089 | $0.0027 |
+| Add structured logging to my Express app | no | — | — | — | 1,088 | $0.0027 |
+| **Total** | | | **—** | **—** | **14,175** | **$0.0354** |
+
+#### Triggers — go-testing
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:15:32+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Write tests for this Go package | yes | — | — | — | 1,149 | $0.0029 |
+| Add table-driven tests for this Go parser | yes | — | — | — | 1,151 | $0.0029 |
+| Add a Go fuzz test for this parsing function | yes | — | — | — | 1,152 | $0.0029 |
+| Test this Go HTTP handler | yes | — | — | — | 1,148 | $0.0029 |
+| How do I run a single fuzz target with go test? | yes | — | — | — | 1,155 | $0.0029 |
+| Review my Go tests — should I be using testify here? | yes | — | — | — | 1,155 | $0.0029 |
+| Add a seed corpus to this Go fuzz target | yes | — | — | — | 1,152 | $0.0029 |
+| Write pytest tests for this module | no | — | — | — | 1,149 | $0.0029 |
+| Refactor this Go function to wrap errors with %w | no | — | — | — | 1,154 | $0.0029 |
+| Set up the GitHub Actions release workflow for our Go repo | no | — | — | — | 1,155 | $0.0029 |
+| Write Jest tests for this React component | no | — | — | — | 1,150 | $0.0029 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,153 | $0.0029 |
+| Why is my JavaScript integration test flaky? | no | — | — | — | 1,152 | $0.0029 |
+| **Total** | | | **—** | **—** | **14,975** | **$0.0374** |
 
 ### GPT-5.5 (`gpt-5.5`)
 
-No results recorded for this model yet — see [Regenerating](#regenerating).
+#### Triggers — go-project
+
+Last run 2026-06-10T15:19:20+00:00, 3 runs per query.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Scaffold a new Go service called payments | yes | 1.00 | PASS | — | 1,111 | $0.0056 |
+| Set up a new Go project with cmd and internal layout | yes | 1.00 | PASS | — | 1,114 | $0.0056 |
+| Add a tools module to pin our Go developer tooling | yes | 1.00 | PASS | — | 1,113 | $0.0056 |
+| Create a Makefile for this Go repo with the standard targets | yes | 1.00 | PASS | — | 1,115 | $0.0056 |
+| Pin addlicense and goreleaser as developer tools in this Go repo | yes | 1.00 | PASS | — | 1,117 | $0.0056 |
+| Restructure this Go repository to the standard layout | yes | 1.00 | PASS | — | 1,112 | $0.0056 |
+| Where should this shared Go code live — pkg or internal? | yes | 0.33 | FAIL | — | 1,115 | $0.0056 |
+| Scaffold a new npm package with the usual project files | no | 0.00 | PASS | — | 1,114 | $0.0056 |
+| Create a new Terraform module with the standard layout | no | 0.00 | PASS | — | 1,112 | $0.0056 |
+| Set up the GitHub Actions release workflow for this Go repo | no | 0.00 | PASS | — | 1,115 | $0.0056 |
+| Write a fuzz test for this Go parser | no | 0.00 | PASS | — | 1,111 | $0.0056 |
+| Initialize a Python project with uv | no | 0.00 | PASS | — | 1,109 | $0.0055 |
+| Add error wrapping to this Go function | no | 0.00 | PASS | — | 1,110 | $0.0056 |
+| **Total** | | | **12/13** | **—** | **14,468** | **$0.0723** |
+
+#### Triggers — go-release
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:13:56+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Set up GoReleaser for this Go project | yes | — | — | — | 1,061 | $0.0053 |
+| Add a release workflow that publishes binaries and container images f… | yes | — | — | — | 1,065 | $0.0053 |
+| Stamp the version and commit into the Go binary at build time | yes | — | — | — | 1,063 | $0.0053 |
+| Add GitHub Actions CI for this Go repo | yes | — | — | — | 1,060 | $0.0053 |
+| Configure Dependabot for our Go modules and GitHub Actions | yes | — | — | — | 1,062 | $0.0053 |
+| Publish multi-arch Docker images from our Go release pipeline | yes | — | — | — | 1,062 | $0.0053 |
+| Add SBOM generation to the Go release build | yes | — | — | — | 1,060 | $0.0053 |
+| Set up semantic-release for my npm package | no | — | — | — | 1,059 | $0.0053 |
+| Write a Dockerfile for my Python app | no | — | — | — | 1,059 | $0.0053 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,061 | $0.0053 |
+| Fix the failing Go unit test in CI | no | — | — | — | 1,059 | $0.0053 |
+| Write table-driven tests before we cut the release | no | — | — | — | 1,060 | $0.0053 |
+| Set up release-please for this TypeScript repo | no | — | — | — | 1,061 | $0.0053 |
+| **Total** | | | **—** | **—** | **13,792** | **$0.0690** |
+
+#### Triggers — go-style
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:14:41+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refactor this Go code to wrap errors properly | yes | — | — | — | 1,090 | $0.0054 |
+| Add structured logging to my Go service | yes | — | — | — | 1,088 | $0.0054 |
+| Review this Go package for idiomatic style | yes | — | — | — | 1,089 | $0.0054 |
+| How should I handle errors in this Go function? | yes | — | — | — | 1,091 | $0.0055 |
+| Add a POST endpoint to my Go server using the stdlib router | yes | — | — | — | 1,094 | $0.0055 |
+| Convert these log.Printf calls to slog | yes | — | — | — | 1,088 | $0.0054 |
+| Should this Go interface live in the consumer or the producer package? | yes | — | — | — | 1,094 | $0.0055 |
+| Write table-driven tests for this Go function | no | — | — | — | 1,089 | $0.0054 |
+| Set up GoReleaser for my Go project | no | — | — | — | 1,091 | $0.0055 |
+| Scaffold a new Go service with cmd and internal directories | no | — | — | — | 1,092 | $0.0055 |
+| Refactor this Rust code to use idiomatic error handling | no | — | — | — | 1,092 | $0.0055 |
+| What's new in the latest Go release? | no | — | — | — | 1,089 | $0.0054 |
+| Add structured logging to my Express app | no | — | — | — | 1,088 | $0.0054 |
+| **Total** | | | **—** | **—** | **14,175** | **$0.0709** |
+
+#### Triggers — go-testing
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:15:32+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Write tests for this Go package | yes | — | — | — | 1,149 | $0.0057 |
+| Add table-driven tests for this Go parser | yes | — | — | — | 1,151 | $0.0058 |
+| Add a Go fuzz test for this parsing function | yes | — | — | — | 1,152 | $0.0058 |
+| Test this Go HTTP handler | yes | — | — | — | 1,148 | $0.0057 |
+| How do I run a single fuzz target with go test? | yes | — | — | — | 1,155 | $0.0058 |
+| Review my Go tests — should I be using testify here? | yes | — | — | — | 1,155 | $0.0058 |
+| Add a seed corpus to this Go fuzz target | yes | — | — | — | 1,152 | $0.0058 |
+| Write pytest tests for this module | no | — | — | — | 1,149 | $0.0057 |
+| Refactor this Go function to wrap errors with %w | no | — | — | — | 1,154 | $0.0058 |
+| Set up the GitHub Actions release workflow for our Go repo | no | — | — | — | 1,155 | $0.0058 |
+| Write Jest tests for this React component | no | — | — | — | 1,150 | $0.0057 |
+| Scaffold a new Go project with a Makefile | no | — | — | — | 1,153 | $0.0058 |
+| Why is my JavaScript integration test flaky? | no | — | — | — | 1,152 | $0.0058 |
+| **Total** | | | **—** | **—** | **14,975** | **$0.0749** |
 
 ## Google
 
 ### Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`)
 
-No results recorded for this model yet — see [Regenerating](#regenerating).
+#### Triggers — go-project
+
+Last run 2026-06-10T13:58:59+00:00, 3 runs per query.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Scaffold a new Go service called payments | yes | 0.00 | FAIL | — | 1,151 | $0.0003 |
+| Set up a new Go project with cmd and internal layout | yes | 0.00 | FAIL | — | 1,154 | $0.0003 |
+| Add a tools module to pin our Go developer tooling | yes | 0.00 | FAIL | — | 1,153 | $0.0003 |
+| Create a Makefile for this Go repo with the standard targets | yes | 0.00 | FAIL | — | 1,154 | $0.0003 |
+| Pin addlicense and goreleaser as developer tools in this Go repo | yes | 0.00 | FAIL | — | 1,157 | $0.0003 |
+| Restructure this Go repository to the standard layout | yes | 0.00 | FAIL | — | 1,152 | $0.0003 |
+| Where should this shared Go code live — pkg or internal? | yes | 0.00 | FAIL | — | 1,155 | $0.0003 |
+| Scaffold a new npm package with the usual project files | no | 0.00 | PASS | — | 1,154 | $0.0003 |
+| Create a new Terraform module with the standard layout | no | 0.00 | PASS | — | 1,152 | $0.0003 |
+| Set up the GitHub Actions release workflow for this Go repo | no | 0.00 | PASS | — | 1,154 | $0.0003 |
+| Write a fuzz test for this Go parser | no | 0.00 | PASS | — | 1,151 | $0.0003 |
+| Initialize a Python project with uv | no | 0.00 | PASS | — | 1,149 | $0.0003 |
+| Add error wrapping to this Go function | no | 0.00 | PASS | — | 1,150 | $0.0003 |
+| **Total** | | | **6/13** | **—** | **14,986** | **$0.0037** |
+
+#### Triggers — go-release
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:13:56+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Set up GoReleaser for this Go project | yes | — | — | — | — | — |
+| Add a release workflow that publishes binaries and container images f… | yes | — | — | — | — | — |
+| Stamp the version and commit into the Go binary at build time | yes | — | — | — | — | — |
+| Add GitHub Actions CI for this Go repo | yes | — | — | — | — | — |
+| Configure Dependabot for our Go modules and GitHub Actions | yes | — | — | — | — | — |
+| Publish multi-arch Docker images from our Go release pipeline | yes | — | — | — | — | — |
+| Add SBOM generation to the Go release build | yes | — | — | — | — | — |
+| Set up semantic-release for my npm package | no | — | — | — | — | — |
+| Write a Dockerfile for my Python app | no | — | — | — | — | — |
+| Scaffold a new Go project with a Makefile | no | — | — | — | — | — |
+| Fix the failing Go unit test in CI | no | — | — | — | — | — |
+| Write table-driven tests before we cut the release | no | — | — | — | — | — |
+| Set up release-please for this TypeScript repo | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
+
+#### Triggers — go-style
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:14:41+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refactor this Go code to wrap errors properly | yes | — | — | — | — | — |
+| Add structured logging to my Go service | yes | — | — | — | — | — |
+| Review this Go package for idiomatic style | yes | — | — | — | — | — |
+| How should I handle errors in this Go function? | yes | — | — | — | — | — |
+| Add a POST endpoint to my Go server using the stdlib router | yes | — | — | — | — | — |
+| Convert these log.Printf calls to slog | yes | — | — | — | — | — |
+| Should this Go interface live in the consumer or the producer package? | yes | — | — | — | — | — |
+| Write table-driven tests for this Go function | no | — | — | — | — | — |
+| Set up GoReleaser for my Go project | no | — | — | — | — | — |
+| Scaffold a new Go service with cmd and internal directories | no | — | — | — | — | — |
+| Refactor this Rust code to use idiomatic error handling | no | — | — | — | — | — |
+| What's new in the latest Go release? | no | — | — | — | — | — |
+| Add structured logging to my Express app | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
+
+#### Triggers — go-testing
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:15:32+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Write tests for this Go package | yes | — | — | — | — | — |
+| Add table-driven tests for this Go parser | yes | — | — | — | — | — |
+| Add a Go fuzz test for this parsing function | yes | — | — | — | — | — |
+| Test this Go HTTP handler | yes | — | — | — | — | — |
+| How do I run a single fuzz target with go test? | yes | — | — | — | — | — |
+| Review my Go tests — should I be using testify here? | yes | — | — | — | — | — |
+| Add a seed corpus to this Go fuzz target | yes | — | — | — | — | — |
+| Write pytest tests for this module | no | — | — | — | — | — |
+| Refactor this Go function to wrap errors with %w | no | — | — | — | — | — |
+| Set up the GitHub Actions release workflow for our Go repo | no | — | — | — | — | — |
+| Write Jest tests for this React component | no | — | — | — | — | — |
+| Scaffold a new Go project with a Makefile | no | — | — | — | — | — |
+| Why is my JavaScript integration test flaky? | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
 
 ### Gemini 3 Flash (preview) (`gemini-3-flash-preview`)
 
-No results recorded for this model yet — see [Regenerating](#regenerating).
+#### Triggers — go-project
+
+Last run 2026-06-10T14:00:32+00:00, 3 runs per query.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Scaffold a new Go service called payments | yes | 0.00 | FAIL | — | 1,151 | $0.0006 |
+| Set up a new Go project with cmd and internal layout | yes | 0.00 | FAIL | — | 1,154 | $0.0006 |
+| Add a tools module to pin our Go developer tooling | yes | 0.00 | FAIL | — | 1,153 | $0.0006 |
+| Create a Makefile for this Go repo with the standard targets | yes | 0.00 | FAIL | — | 1,154 | $0.0006 |
+| Pin addlicense and goreleaser as developer tools in this Go repo | yes | 0.00 | FAIL | — | 1,157 | $0.0006 |
+| Restructure this Go repository to the standard layout | yes | 0.00 | FAIL | — | 1,152 | $0.0006 |
+| Where should this shared Go code live — pkg or internal? | yes | 0.00 | FAIL | — | 1,155 | $0.0006 |
+| Scaffold a new npm package with the usual project files | no | 0.00 | PASS | — | 1,154 | $0.0006 |
+| Create a new Terraform module with the standard layout | no | 0.00 | PASS | — | 1,152 | $0.0006 |
+| Set up the GitHub Actions release workflow for this Go repo | no | 0.00 | PASS | — | 1,154 | $0.0006 |
+| Write a fuzz test for this Go parser | no | 0.00 | PASS | — | 1,151 | $0.0006 |
+| Initialize a Python project with uv | no | 0.00 | PASS | — | 1,149 | $0.0006 |
+| Add error wrapping to this Go function | no | 0.00 | PASS | — | 1,150 | $0.0006 |
+| **Total** | | | **6/13** | **—** | **14,986** | **$0.0075** |
+
+#### Triggers — go-release
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:13:56+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Set up GoReleaser for this Go project | yes | — | — | — | — | — |
+| Add a release workflow that publishes binaries and container images f… | yes | — | — | — | — | — |
+| Stamp the version and commit into the Go binary at build time | yes | — | — | — | — | — |
+| Add GitHub Actions CI for this Go repo | yes | — | — | — | — | — |
+| Configure Dependabot for our Go modules and GitHub Actions | yes | — | — | — | — | — |
+| Publish multi-arch Docker images from our Go release pipeline | yes | — | — | — | — | — |
+| Add SBOM generation to the Go release build | yes | — | — | — | — | — |
+| Set up semantic-release for my npm package | no | — | — | — | — | — |
+| Write a Dockerfile for my Python app | no | — | — | — | — | — |
+| Scaffold a new Go project with a Makefile | no | — | — | — | — | — |
+| Fix the failing Go unit test in CI | no | — | — | — | — | — |
+| Write table-driven tests before we cut the release | no | — | — | — | — | — |
+| Set up release-please for this TypeScript repo | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
+
+#### Triggers — go-style
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:14:41+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refactor this Go code to wrap errors properly | yes | — | — | — | — | — |
+| Add structured logging to my Go service | yes | — | — | — | — | — |
+| Review this Go package for idiomatic style | yes | — | — | — | — | — |
+| How should I handle errors in this Go function? | yes | — | — | — | — | — |
+| Add a POST endpoint to my Go server using the stdlib router | yes | — | — | — | — | — |
+| Convert these log.Printf calls to slog | yes | — | — | — | — | — |
+| Should this Go interface live in the consumer or the producer package? | yes | — | — | — | — | — |
+| Write table-driven tests for this Go function | no | — | — | — | — | — |
+| Set up GoReleaser for my Go project | no | — | — | — | — | — |
+| Scaffold a new Go service with cmd and internal directories | no | — | — | — | — | — |
+| Refactor this Rust code to use idiomatic error handling | no | — | — | — | — | — |
+| What's new in the latest Go release? | no | — | — | — | — | — |
+| Add structured logging to my Express app | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
+
+#### Triggers — go-testing
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:15:32+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Write tests for this Go package | yes | — | — | — | — | — |
+| Add table-driven tests for this Go parser | yes | — | — | — | — | — |
+| Add a Go fuzz test for this parsing function | yes | — | — | — | — | — |
+| Test this Go HTTP handler | yes | — | — | — | — | — |
+| How do I run a single fuzz target with go test? | yes | — | — | — | — | — |
+| Review my Go tests — should I be using testify here? | yes | — | — | — | — | — |
+| Add a seed corpus to this Go fuzz target | yes | — | — | — | — | — |
+| Write pytest tests for this module | no | — | — | — | — | — |
+| Refactor this Go function to wrap errors with %w | no | — | — | — | — | — |
+| Set up the GitHub Actions release workflow for our Go repo | no | — | — | — | — | — |
+| Write Jest tests for this React component | no | — | — | — | — | — |
+| Scaffold a new Go project with a Makefile | no | — | — | — | — | — |
+| Why is my JavaScript integration test flaky? | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
 
 ### Gemini 3.5 Flash (`gemini-3.5-flash`)
 
-No results recorded for this model yet — see [Regenerating](#regenerating).
+#### Triggers — go-project
+
+Last run 2026-06-10T14:02:06+00:00, 3 runs per query.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Scaffold a new Go service called payments | yes | 0.00 | FAIL | — | 1,151 | $0.0017 |
+| Set up a new Go project with cmd and internal layout | yes | 0.00 | FAIL | — | 1,154 | $0.0017 |
+| Add a tools module to pin our Go developer tooling | yes | 0.00 | FAIL | — | 1,153 | $0.0017 |
+| Create a Makefile for this Go repo with the standard targets | yes | 0.00 | FAIL | — | 1,154 | $0.0017 |
+| Pin addlicense and goreleaser as developer tools in this Go repo | yes | 0.00 | FAIL | — | 1,157 | $0.0017 |
+| Restructure this Go repository to the standard layout | yes | 0.00 | FAIL | — | 1,152 | $0.0017 |
+| Where should this shared Go code live — pkg or internal? | yes | 0.00 | FAIL | — | 1,155 | $0.0017 |
+| Scaffold a new npm package with the usual project files | no | 0.00 | PASS | — | 1,154 | $0.0017 |
+| Create a new Terraform module with the standard layout | no | 0.00 | PASS | — | 1,152 | $0.0017 |
+| Set up the GitHub Actions release workflow for this Go repo | no | 0.00 | PASS | — | 1,154 | $0.0017 |
+| Write a fuzz test for this Go parser | no | 0.00 | PASS | — | 1,151 | $0.0017 |
+| Initialize a Python project with uv | no | 0.00 | PASS | — | 1,149 | $0.0017 |
+| Add error wrapping to this Go function | no | 0.00 | PASS | — | 1,150 | $0.0017 |
+| **Total** | | | **6/13** | **—** | **14,986** | **$0.0225** |
+
+#### Triggers — go-release
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:13:56+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Set up GoReleaser for this Go project | yes | — | — | — | — | — |
+| Add a release workflow that publishes binaries and container images f… | yes | — | — | — | — | — |
+| Stamp the version and commit into the Go binary at build time | yes | — | — | — | — | — |
+| Add GitHub Actions CI for this Go repo | yes | — | — | — | — | — |
+| Configure Dependabot for our Go modules and GitHub Actions | yes | — | — | — | — | — |
+| Publish multi-arch Docker images from our Go release pipeline | yes | — | — | — | — | — |
+| Add SBOM generation to the Go release build | yes | — | — | — | — | — |
+| Set up semantic-release for my npm package | no | — | — | — | — | — |
+| Write a Dockerfile for my Python app | no | — | — | — | — | — |
+| Scaffold a new Go project with a Makefile | no | — | — | — | — | — |
+| Fix the failing Go unit test in CI | no | — | — | — | — | — |
+| Write table-driven tests before we cut the release | no | — | — | — | — | — |
+| Set up release-please for this TypeScript repo | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
+
+#### Triggers — go-style
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:14:41+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refactor this Go code to wrap errors properly | yes | — | — | — | — | — |
+| Add structured logging to my Go service | yes | — | — | — | — | — |
+| Review this Go package for idiomatic style | yes | — | — | — | — | — |
+| How should I handle errors in this Go function? | yes | — | — | — | — | — |
+| Add a POST endpoint to my Go server using the stdlib router | yes | — | — | — | — | — |
+| Convert these log.Printf calls to slog | yes | — | — | — | — | — |
+| Should this Go interface live in the consumer or the producer package? | yes | — | — | — | — | — |
+| Write table-driven tests for this Go function | no | — | — | — | — | — |
+| Set up GoReleaser for my Go project | no | — | — | — | — | — |
+| Scaffold a new Go service with cmd and internal directories | no | — | — | — | — | — |
+| Refactor this Rust code to use idiomatic error handling | no | — | — | — | — | — |
+| What's new in the latest Go release? | no | — | — | — | — | — |
+| Add structured logging to my Express app | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
+
+#### Triggers — go-testing
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:15:32+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Write tests for this Go package | yes | — | — | — | — | — |
+| Add table-driven tests for this Go parser | yes | — | — | — | — | — |
+| Add a Go fuzz test for this parsing function | yes | — | — | — | — | — |
+| Test this Go HTTP handler | yes | — | — | — | — | — |
+| How do I run a single fuzz target with go test? | yes | — | — | — | — | — |
+| Review my Go tests — should I be using testify here? | yes | — | — | — | — | — |
+| Add a seed corpus to this Go fuzz target | yes | — | — | — | — | — |
+| Write pytest tests for this module | no | — | — | — | — | — |
+| Refactor this Go function to wrap errors with %w | no | — | — | — | — | — |
+| Set up the GitHub Actions release workflow for our Go repo | no | — | — | — | — | — |
+| Write Jest tests for this React component | no | — | — | — | — | — |
+| Scaffold a new Go project with a Makefile | no | — | — | — | — | — |
+| Why is my JavaScript integration test flaky? | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
 
 ### Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`)
 
-No results recorded for this model yet — see [Regenerating](#regenerating).
+#### Triggers — go-project
+
+Last run 2026-06-10T14:03:37+00:00, 3 runs per query.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Scaffold a new Go service called payments | yes | 0.00 | FAIL | — | 1,151 | $0.0023 |
+| Set up a new Go project with cmd and internal layout | yes | 0.00 | FAIL | — | 1,154 | $0.0023 |
+| Add a tools module to pin our Go developer tooling | yes | 0.00 | FAIL | — | 1,153 | $0.0023 |
+| Create a Makefile for this Go repo with the standard targets | yes | 0.00 | FAIL | — | 1,154 | $0.0023 |
+| Pin addlicense and goreleaser as developer tools in this Go repo | yes | 0.00 | FAIL | — | 1,157 | $0.0023 |
+| Restructure this Go repository to the standard layout | yes | 0.00 | FAIL | — | 1,152 | $0.0023 |
+| Where should this shared Go code live — pkg or internal? | yes | 0.00 | FAIL | — | 1,155 | $0.0023 |
+| Scaffold a new npm package with the usual project files | no | 0.00 | PASS | — | 1,154 | $0.0023 |
+| Create a new Terraform module with the standard layout | no | 0.00 | PASS | — | 1,152 | $0.0023 |
+| Set up the GitHub Actions release workflow for this Go repo | no | 0.00 | PASS | — | 1,154 | $0.0023 |
+| Write a fuzz test for this Go parser | no | 0.00 | PASS | — | 1,151 | $0.0023 |
+| Initialize a Python project with uv | no | 0.00 | PASS | — | 1,149 | $0.0023 |
+| Add error wrapping to this Go function | no | 0.00 | PASS | — | 1,150 | $0.0023 |
+| **Total** | | | **6/13** | **—** | **14,986** | **$0.0300** |
+
+#### Triggers — go-release
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:13:56+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Set up GoReleaser for this Go project | yes | — | — | — | — | — |
+| Add a release workflow that publishes binaries and container images f… | yes | — | — | — | — | — |
+| Stamp the version and commit into the Go binary at build time | yes | — | — | — | — | — |
+| Add GitHub Actions CI for this Go repo | yes | — | — | — | — | — |
+| Configure Dependabot for our Go modules and GitHub Actions | yes | — | — | — | — | — |
+| Publish multi-arch Docker images from our Go release pipeline | yes | — | — | — | — | — |
+| Add SBOM generation to the Go release build | yes | — | — | — | — | — |
+| Set up semantic-release for my npm package | no | — | — | — | — | — |
+| Write a Dockerfile for my Python app | no | — | — | — | — | — |
+| Scaffold a new Go project with a Makefile | no | — | — | — | — | — |
+| Fix the failing Go unit test in CI | no | — | — | — | — | — |
+| Write table-driven tests before we cut the release | no | — | — | — | — | — |
+| Set up release-please for this TypeScript repo | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
+
+#### Triggers — go-style
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:14:41+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refactor this Go code to wrap errors properly | yes | — | — | — | — | — |
+| Add structured logging to my Go service | yes | — | — | — | — | — |
+| Review this Go package for idiomatic style | yes | — | — | — | — | — |
+| How should I handle errors in this Go function? | yes | — | — | — | — | — |
+| Add a POST endpoint to my Go server using the stdlib router | yes | — | — | — | — | — |
+| Convert these log.Printf calls to slog | yes | — | — | — | — | — |
+| Should this Go interface live in the consumer or the producer package? | yes | — | — | — | — | — |
+| Write table-driven tests for this Go function | no | — | — | — | — | — |
+| Set up GoReleaser for my Go project | no | — | — | — | — | — |
+| Scaffold a new Go service with cmd and internal directories | no | — | — | — | — | — |
+| Refactor this Rust code to use idiomatic error handling | no | — | — | — | — | — |
+| What's new in the latest Go release? | no | — | — | — | — | — |
+| Add structured logging to my Express app | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
+
+#### Triggers — go-testing
+
+Token counts only (no eval session executed). Counted 2026-06-10T13:15:32+00:00.
+
+| Query | Expected | Rate | Result | Avg run | Input tokens | Est. input cost (USD) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Write tests for this Go package | yes | — | — | — | — | — |
+| Add table-driven tests for this Go parser | yes | — | — | — | — | — |
+| Add a Go fuzz test for this parsing function | yes | — | — | — | — | — |
+| Test this Go HTTP handler | yes | — | — | — | — | — |
+| How do I run a single fuzz target with go test? | yes | — | — | — | — | — |
+| Review my Go tests — should I be using testify here? | yes | — | — | — | — | — |
+| Add a seed corpus to this Go fuzz target | yes | — | — | — | — | — |
+| Write pytest tests for this module | no | — | — | — | — | — |
+| Refactor this Go function to wrap errors with %w | no | — | — | — | — | — |
+| Set up the GitHub Actions release workflow for our Go repo | no | — | — | — | — | — |
+| Write Jest tests for this React component | no | — | — | — | — | — |
+| Scaffold a new Go project with a Makefile | no | — | — | — | — | — |
+| Why is my JavaScript integration test flaky? | no | — | — | — | — | — |
+| **Total** | | | **—** | **—** | **—** | **—** |
 
 ## Regenerating
 
