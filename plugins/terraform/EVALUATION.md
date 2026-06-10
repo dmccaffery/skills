@@ -81,6 +81,36 @@ Last run 2026-06-10T01:20:15+00:00, 3 runs per query.
 | Lint the markdown files under docs/ | no | 0.00 | PASS | 585 | $0.0006 |
 | **Total** | | | **8/11** | **6,454** | **$0.0065** |
 
+#### Cases — terraform-module
+
+Last run 2026-06-10T02:52:05+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| module-scaffold | PASS | 711 | $0.0007 | 245,939/2,566 | $0.0806 |
+| module-restructure | FAIL | 684 | $0.0007 | 626,176/3,598 | $0.1436 |
+| **Total** | **1/2** | **1,395** | **$0.0014** | **872,115/6,164** | **$0.2241** |
+
+#### Cases — terraform-style
+
+Last run 2026-06-10T03:09:11+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| style-grouped-variable | PASS | 1,531 | $0.0015 | 365,815/2,366 | $0.1062 |
+| style-toggle-resource | FAIL | 1,519 | $0.0015 | 330,095/2,562 | $0.0888 |
+| **Total** | **1/2** | **3,050** | **$0.0031** | **695,910/4,928** | **$0.1950** |
+
+#### Cases — terraform-validate
+
+Last run 2026-06-10T03:18:15+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| validate-fix-module | PASS | 600 | $0.0006 | 361,585/2,445 | $0.0921 |
+| validate-seed-tflint | PASS | 607 | $0.0006 | 306,969/2,740 | $0.0886 |
+| **Total** | **2/2** | **1,207** | **$0.0012** | **668,554/5,185** | **$0.1806** |
+
 ### Claude Sonnet 4.6 (`claude-sonnet-4-6`)
 
 #### Triggers — terraform-module
@@ -141,6 +171,36 @@ Last run 2026-06-10T01:24:16+00:00, 3 runs per query.
 | Write a new variables.tf for the cluster module | no | 0.00 | PASS | 587 | $0.0018 |
 | Lint the markdown files under docs/ | no | 0.00 | PASS | 585 | $0.0018 |
 | **Total** | | | **9/11** | **6,454** | **$0.0194** |
+
+#### Cases — terraform-module
+
+Last run 2026-06-10T02:56:13+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| module-scaffold | PASS | 711 | $0.0021 | 779,848/6,801 | $0.4631 |
+| module-restructure | PASS | 684 | $0.0021 | 635,797/4,227 | $0.3714 |
+| **Total** | **2/2** | **1,395** | **$0.0042** | **1,415,645/11,028** | **$0.8345** |
+
+#### Cases — terraform-style
+
+Last run 2026-06-10T03:10:41+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| style-grouped-variable | PASS | 1,531 | $0.0046 | 107,633/1,040 | $0.1623 |
+| style-toggle-resource | PASS | 1,519 | $0.0046 | 161,351/1,969 | $0.1784 |
+| **Total** | **2/2** | **3,050** | **$0.0092** | **268,984/3,009** | **$0.3407** |
+
+#### Cases — terraform-validate
+
+Last run 2026-06-10T03:20:48+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| validate-fix-module | PASS | 600 | $0.0018 | 384,609/2,322 | $0.2524 |
+| validate-seed-tflint | PASS | 607 | $0.0018 | 273,924/2,289 | $0.2164 |
+| **Total** | **2/2** | **1,207** | **$0.0036** | **658,533/4,611** | **$0.4688** |
 
 ### Claude Opus 4.8 (`claude-opus-4-8`)
 
@@ -203,6 +263,36 @@ Last run 2026-06-10T01:30:46+00:00, 3 runs per query.
 | Lint the markdown files under docs/ | no | 0.00 | PASS | 822 | $0.0041 |
 | **Total** | | | **8/11** | **9,072** | **$0.0454** |
 
+#### Cases — terraform-module
+
+Last run 2026-06-10T03:02:21+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| module-scaffold | PASS | 984 | $0.0049 | 636,242/13,527 | $0.9206 |
+| module-restructure | PASS | 940 | $0.0047 | 502,256/6,564 | $0.6388 |
+| **Total** | **2/2** | **1,924** | **$0.0096** | **1,138,498/20,091** | **$1.5594** |
+
+#### Cases — terraform-style
+
+Last run 2026-06-10T03:13:19+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| style-grouped-variable | PASS | 2,048 | $0.0102 | 191,485/2,633 | $0.3428 |
+| style-toggle-resource | PASS | 2,023 | $0.0101 | 322,399/4,394 | $0.4692 |
+| **Total** | **2/2** | **4,071** | **$0.0204** | **513,884/7,027** | **$0.8121** |
+
+#### Cases — terraform-validate
+
+Last run 2026-06-10T03:27:20+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| validate-fix-module | PASS | 846 | $0.0042 | 534,150/9,949 | $0.7444 |
+| validate-seed-tflint | PASS | 852 | $0.0043 | 428,773/13,615 | $0.8049 |
+| **Total** | **2/2** | **1,698** | **$0.0085** | **962,923/23,564** | **$1.5493** |
+
 ### Claude Fable 5 (`claude-fable-5`)
 
 #### Triggers — terraform-module
@@ -263,6 +353,36 @@ Last run 2026-06-10T01:36:33+00:00, 3 runs per query.
 | Write a new variables.tf for the cluster module | no | 0.00 | PASS | 825 | $0.0083 |
 | Lint the markdown files under docs/ | no | 0.00 | PASS | 822 | $0.0082 |
 | **Total** | | | **11/11** | **9,072** | **$0.0907** |
+
+#### Cases — terraform-module
+
+Last run 2026-06-10T03:07:29+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| module-scaffold | PASS | 984 | $0.0098 | 471,802/9,239 | $1.4181 |
+| module-restructure | PASS | 940 | $0.0094 | 386,902/4,866 | $1.0364 |
+| **Total** | **2/2** | **1,924** | **$0.0192** | **858,704/14,105** | **$2.4545** |
+
+#### Cases — terraform-style
+
+Last run 2026-06-10T03:16:35+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| style-grouped-variable | PASS | 2,048 | $0.0205 | 289,790/2,693 | $0.8078 |
+| style-toggle-resource | PASS | 2,023 | $0.0202 | 295,391/3,501 | $0.8618 |
+| **Total** | **2/2** | **4,071** | **$0.0407** | **585,181/6,194** | **$1.6696** |
+
+#### Cases — terraform-validate
+
+Last run 2026-06-10T03:31:34+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| validate-fix-module | PASS | 846 | $0.0085 | 403,678/4,818 | $1.0405 |
+| validate-seed-tflint | PASS | 852 | $0.0085 | 289,930/4,541 | $0.9040 |
+| **Total** | **2/2** | **1,698** | **$0.0170** | **693,608/9,359** | **$1.9446** |
 
 ## OpenAI
 

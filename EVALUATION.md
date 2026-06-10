@@ -35,10 +35,10 @@ reads), output tokens, and cost.
 
 | Model | Passed | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
 | --- | --- | --- | --- | --- | --- |
-| Claude Haiku 4.5 (`claude-haiku-4-5`) | — | — | — | — | — |
-| Claude Sonnet 4.6 (`claude-sonnet-4-6`) | — | — | — | — | — |
-| Claude Opus 4.8 (`claude-opus-4-8`) | — | — | — | — | — |
-| Claude Fable 5 (`claude-fable-5`) | — | — | — | — | — |
+| Claude Haiku 4.5 (`claude-haiku-4-5`) | 5/8 | 10,452 | $0.0105 | 1,511,586/23,418 | $0.6284 |
+| Claude Sonnet 4.6 (`claude-sonnet-4-6`) | 7/8 | 10,452 | $0.0314 | 1,505,765/26,369 | $1.7918 |
+| Claude Opus 4.8 (`claude-opus-4-8`) | 7/8 | 14,066 | $0.0703 | 3,106,639/76,702 | $5.5133 |
+| Claude Fable 5 (`claude-fable-5`) | 7/8 | 14,066 | $0.1407 | 3,517,098/69,758 | $10.9844 |
 
 ### terraform
 
@@ -55,10 +55,10 @@ reads), output tokens, and cost.
 
 | Model | Passed | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
 | --- | --- | --- | --- | --- | --- |
-| Claude Haiku 4.5 (`claude-haiku-4-5`) | — | — | — | — | — |
-| Claude Sonnet 4.6 (`claude-sonnet-4-6`) | — | — | — | — | — |
-| Claude Opus 4.8 (`claude-opus-4-8`) | — | — | — | — | — |
-| Claude Fable 5 (`claude-fable-5`) | — | — | — | — | — |
+| Claude Haiku 4.5 (`claude-haiku-4-5`) | 4/6 | 5,652 | $0.0057 | 2,236,579/16,277 | $0.5998 |
+| Claude Sonnet 4.6 (`claude-sonnet-4-6`) | 6/6 | 5,652 | $0.0170 | 2,343,162/18,648 | $1.6441 |
+| Claude Opus 4.8 (`claude-opus-4-8`) | 6/6 | 7,693 | $0.0385 | 2,615,305/50,682 | $3.9208 |
+| Claude Fable 5 (`claude-fable-5`) | 6/6 | 7,693 | $0.0769 | 2,137,493/29,658 | $6.0687 |
 
 ## OpenAI
 

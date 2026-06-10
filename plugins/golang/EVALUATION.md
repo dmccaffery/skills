@@ -22,19 +22,171 @@ reads), output tokens, and cost.
 
 ### Claude Haiku 4.5 (`claude-haiku-4-5`)
 
-No results recorded for this model yet — see [Regenerating](#regenerating).
+#### Cases — go-project
+
+Last run 2026-06-10T01:55:27+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| project-scaffold | FAIL | 1,294 | $0.0013 | 231,173/3,936 | $0.0917 |
+| pin-tool | FAIL | 1,291 | $0.0013 | 106,571/1,187 | $0.0574 |
+| **Total** | **0/2** | **2,585** | **$0.0026** | **337,744/5,123** | **$0.1491** |
+
+#### Cases — go-release
+
+Last run 2026-06-10T02:14:44+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| goreleaser-setup | FAIL | 1,221 | $0.0012 | 230,581/5,076 | $0.0965 |
+| ci-dependabot | PASS | 1,232 | $0.0012 | 369,850/3,429 | $0.1007 |
+| **Total** | **1/2** | **2,453** | **$0.0025** | **600,431/8,505** | **$0.1973** |
+
+#### Cases — go-style
+
+Last run 2026-06-10T02:35:26+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| wrap-errors-slog | PASS | 1,298 | $0.0013 | 109,229/2,167 | $0.0662 |
+| stdlib-handler | PASS | 1,312 | $0.0013 | 108,680/4,745 | $0.0785 |
+| **Total** | **2/2** | **2,610** | **$0.0026** | **217,909/6,912** | **$0.1447** |
+
+#### Cases — go-testing
+
+Last run 2026-06-10T02:44:27+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| table-driven | PASS | 1,398 | $0.0014 | 106,875/1,157 | $0.0572 |
+| fuzz-target | PASS | 1,406 | $0.0014 | 248,627/1,721 | $0.0802 |
+| **Total** | **2/2** | **2,804** | **$0.0028** | **355,502/2,878** | **$0.1374** |
 
 ### Claude Sonnet 4.6 (`claude-sonnet-4-6`)
 
-No results recorded for this model yet — see [Regenerating](#regenerating).
+#### Cases — go-project
+
+Last run 2026-06-10T01:58:17+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| project-scaffold | PASS | 1,294 | $0.0039 | 210,007/5,792 | $0.2730 |
+| pin-tool | FAIL | 1,291 | $0.0039 | 136,644/3,355 | $0.1966 |
+| **Total** | **1/2** | **2,585** | **$0.0078** | **346,651/9,147** | **$0.4696** |
+
+#### Cases — go-release
+
+Last run 2026-06-10T02:18:59+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| goreleaser-setup | PASS | 1,221 | $0.0037 | 374,878/8,275 | $0.4538 |
+| ci-dependabot | PASS | 1,232 | $0.0037 | 192,251/2,075 | $0.1926 |
+| **Total** | **2/2** | **2,453** | **$0.0074** | **567,129/10,350** | **$0.6464** |
+
+#### Cases — go-style
+
+Last run 2026-06-10T02:36:52+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| wrap-errors-slog | PASS | 1,298 | $0.0039 | 136,540/2,599 | $0.1821 |
+| stdlib-handler | PASS | 1,312 | $0.0039 | 135,656/1,698 | $0.1642 |
+| **Total** | **2/2** | **2,610** | **$0.0078** | **272,196/4,297** | **$0.3464** |
+
+#### Cases — go-testing
+
+Last run 2026-06-10T02:45:31+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| table-driven | PASS | 1,398 | $0.0042 | 159,758/1,370 | $0.1661 |
+| fuzz-target | PASS | 1,406 | $0.0042 | 160,031/1,205 | $0.1634 |
+| **Total** | **2/2** | **2,804** | **$0.0084** | **319,789/2,575** | **$0.3295** |
 
 ### Claude Opus 4.8 (`claude-opus-4-8`)
 
-No results recorded for this model yet — see [Regenerating](#regenerating).
+#### Cases — go-project
+
+Last run 2026-06-10T02:06:47+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| project-scaffold | FAIL | 1,746 | $0.0087 | 1,125,922/26,363 | $1.7240 |
+| pin-tool | PASS | 1,739 | $0.0087 | 184,085/6,166 | $0.4606 |
+| **Total** | **1/2** | **3,485** | **$0.0174** | **1,310,007/32,529** | **$2.1846** |
+
+#### Cases — go-release
+
+Last run 2026-06-10T02:25:20+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| goreleaser-setup | PASS | 1,704 | $0.0085 | 870,079/20,736 | $1.2843 |
+| ci-dependabot | PASS | 1,725 | $0.0086 | 140,567/3,341 | $0.3450 |
+| **Total** | **2/2** | **3,429** | **$0.0171** | **1,010,646/24,077** | **$1.6293** |
+
+#### Cases — go-style
+
+Last run 2026-06-10T02:39:56+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| wrap-errors-slog | PASS | 1,730 | $0.0086 | 141,026/4,112 | $0.3612 |
+| stdlib-handler | PASS | 1,753 | $0.0088 | 199,865/10,547 | $0.6077 |
+| **Total** | **2/2** | **3,483** | **$0.0174** | **340,891/14,659** | **$0.9688** |
+
+#### Cases — go-testing
+
+Last run 2026-06-10T02:47:38+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| table-driven | PASS | 1,827 | $0.0091 | 192,065/2,468 | $0.3412 |
+| fuzz-target | PASS | 1,842 | $0.0092 | 253,030/2,969 | $0.3895 |
+| **Total** | **2/2** | **3,669** | **$0.0183** | **445,095/5,437** | **$0.7306** |
 
 ### Claude Fable 5 (`claude-fable-5`)
 
-No results recorded for this model yet — see [Regenerating](#regenerating).
+#### Cases — go-project
+
+Last run 2026-06-10T02:13:00+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| project-scaffold | FAIL | 1,746 | $0.0175 | 979,930/16,361 | $2.5326 |
+| pin-tool | PASS | 1,739 | $0.0174 | 180,451/3,587 | $0.7857 |
+| **Total** | **1/2** | **3,485** | **$0.0348** | **1,160,381/19,948** | **$3.3183** |
+
+#### Cases — go-release
+
+Last run 2026-06-10T02:34:28+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| goreleaser-setup | PASS | 1,704 | $0.0170 | 1,211,073/27,741 | $3.4174 |
+| ci-dependabot | PASS | 1,725 | $0.0173 | 114,615/2,942 | $0.6456 |
+| **Total** | **2/2** | **3,429** | **$0.0343** | **1,325,688/30,683** | **$4.0630** |
+
+#### Cases — go-style
+
+Last run 2026-06-10T02:43:37+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| wrap-errors-slog | PASS | 1,730 | $0.0173 | 228,954/2,681 | $0.7369 |
+| stdlib-handler | PASS | 1,753 | $0.0175 | 336,837/10,108 | $1.3054 |
+| **Total** | **2/2** | **3,483** | **$0.0348** | **565,791/12,789** | **$2.0423** |
+
+#### Cases — go-testing
+
+Last run 2026-06-10T02:50:17+00:00.
+
+| Case | Result | Input tokens | Est. input cost (USD) | Measured tokens (in/out) | Measured cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| table-driven | PASS | 1,827 | $0.0183 | 233,680/3,142 | $0.7824 |
+| fuzz-target | PASS | 1,842 | $0.0184 | 231,558/3,196 | $0.7784 |
+| **Total** | **2/2** | **3,669** | **$0.0367** | **465,238/6,338** | **$1.5607** |
 
 ## OpenAI
 
