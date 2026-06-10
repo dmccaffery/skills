@@ -20,6 +20,7 @@ sha256(model + payload), so re-runs and report regeneration cost nothing.
 
 import hashlib
 import json
+import math
 import os
 import sys
 import urllib.error
@@ -71,6 +72,12 @@ PROVIDERS = {
         ],
     },
 }
+
+
+def default_jobs():
+    """Default concurrency for agent runs: half the CPUs, rounded up. Runs are
+    network-bound (remote LLM calls), so this is a politeness cap, not a CPU one."""
+    return math.ceil((os.cpu_count() or 2) / 2)
 
 
 def select_models(spec):

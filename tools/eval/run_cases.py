@@ -38,10 +38,12 @@ Case schema:
 
 Usage:
   python3 tools/eval/run_cases.py [--skill NAME] [--case ID] [--models SPEC]
-                                  [--timeout SECS] [--count-only]
+                                  [--timeout SECS] [--jobs N] [--count-only]
 
   --models accepts provider names, model ids, or "all" (comma-separated).
   Default: "anthropic" (all four Anthropic models).
+  --jobs caps concurrent cases within each model's batch
+  (default: ceil(cpus/2)).
 
 Results merge into evals-results/cases-<skill>.json (one entry per model), then
 tools/eval/report.py regenerates EVALUATION.md and plugins/*/EVALUATION.md.
@@ -55,6 +57,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -238,14 +241,16 @@ def run_case(plugin_dir, skill, case, provider_key, model, args):
     ws = make_workspace(plugin_dir, case.get("files"))
     try:
         output, measured = runner(ws, case, model["id"], args.timeout)
-        graded = []
+        graded, lines = [], []
         for assertion in case["assertions"]:
             passed, evidence = grade(assertion, ws, output, args.timeout)
             graded.append({**assertion, "passed": passed, "evidence": evidence})
             marker = "SKIP" if passed is None else ("PASS" if passed else "FAIL")
             label = assertion.get("text") or assertion.get("pattern") \
                 or assertion.get("run") or assertion.get("path")
-            print(f"  [{marker}] {case['id']}: {label}")
+            lines.append(f"  [{marker}] {case['id']}: {label}")
+        # One write per case so concurrently-running cases don't interleave.
+        print("\n".join(lines), flush=True)
         case_passed = all(g["passed"] is not False for g in graded)
         if measured:
             measured["cost_usd"] = measured.get("cost_usd") \
@@ -262,10 +267,14 @@ def main():
     ap.add_argument("--models", default="anthropic",
                     help='comma-separated provider names / model ids, or "all"')
     ap.add_argument("--timeout", type=int, default=600, help="seconds per agent run")
+    ap.add_argument("--jobs", type=int, default=providers.default_jobs(),
+                    help="concurrent cases (default: ceil(cpus/2))")
     ap.add_argument("--count-only", action="store_true",
                     help="skip agent runs; only compute token usage per model")
     args = ap.parse_args()
 
+    if not args.count_only:
+        print(f"parallelism: {args.jobs} concurrent cases")
     selected = providers.select_models(args.models)
     counter = providers.TokenCounter()
     RESULTS_DIR.mkdir(exist_ok=True)
@@ -289,26 +298,34 @@ def main():
 
             mode = "run" if execute else "count-only"
             print(f"\n=== {skill} / {model['id']} ({mode}) ===")
+            # Token counting stays in this thread (TokenCounter is not
+            # thread-safe and cache-cheap); only case runs go parallel — each
+            # gets its own workspace inside run_case.
             results = []
             for case in cases:
                 tokens = counter.count(
                     provider_key, model["id"], f"{skill_md}\n\n{case['prompt']}",
                 )
-                entry = {
+                results.append({
                     "id": case["id"],
                     "passed": None,
                     "assertions": None,
                     "input_tokens": tokens,
                     "est_input_cost_usd": providers.input_cost_usd(model, tokens),
                     "measured": None,
-                }
-                if execute:
-                    passed, graded, measured = run_case(
-                        plugin_dir, skill, case, provider_key, model, args,
-                    )
-                    any_failed |= not passed
-                    entry.update({"passed": passed, "assertions": graded, "measured": measured})
-                results.append(entry)
+                })
+            if execute:
+                with ThreadPoolExecutor(max_workers=args.jobs) as pool:
+                    futures = {
+                        pool.submit(run_case, plugin_dir, skill, case,
+                                    provider_key, model, args): i
+                        for i, case in enumerate(cases)
+                    }
+                    for future in as_completed(futures):
+                        passed, graded, measured = future.result()
+                        any_failed |= not passed
+                        results[futures[future]].update(
+                            {"passed": passed, "assertions": graded, "measured": measured})
 
             executed = [r for r in results if r["passed"] is not None]
             token_counts = [r["input_tokens"] for r in results if r["input_tokens"] is not None]

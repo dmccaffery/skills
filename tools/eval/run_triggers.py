@@ -19,10 +19,12 @@ Google -> `gemini -p`. Models whose runner CLI is missing are token-counted only
 
 Usage:
   python3 tools/eval/run_triggers.py [--skill NAME] [--models SPEC] [--runs N]
-                                     [--timeout SECS] [--count-only]
+                                     [--timeout SECS] [--jobs N] [--count-only]
 
   --models accepts provider names, model ids, or "all" (comma-separated).
   Default: "anthropic" (all four Anthropic models).
+  --jobs caps concurrent agent runs within each model's batch
+  (default: ceil(cpus/2)).
 
 Results merge into evals-results/triggers-<skill>.json (one entry per model),
 then tools/eval/report.py regenerates EVALUATION.md and plugins/*/EVALUATION.md.
@@ -37,6 +39,7 @@ import sys
 import tempfile
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -170,6 +173,37 @@ TRIGGER_RUNNERS = {
 }
 
 
+def run_queries(runner, ws, skill, model_id, cases, results, args):
+    """Execute every query's runs concurrently (--jobs at a time), fill each
+    result's trigger_rate/passed in place, and print verdicts as queries
+    finish. Sharing the workspace is safe: trigger sessions are read-only.
+    Returns True when any query failed."""
+    hits = [0] * len(cases)
+    remaining = [args.runs] * len(cases)
+    failed = False
+    with ThreadPoolExecutor(max_workers=args.jobs) as pool:
+        futures = {
+            pool.submit(runner, ws, case["query"], skill, model_id, args.timeout): i
+            for i, case in enumerate(cases)
+            for _ in range(args.runs)
+        }
+        for future in as_completed(futures):
+            i = futures[future]
+            hits[i] += bool(future.result())
+            remaining[i] -= 1
+            if remaining[i]:
+                continue
+            rate = hits[i] / args.runs
+            expected = cases[i]["should_trigger"]
+            passed = (rate >= 0.5) if expected else (rate < 0.5)
+            failed |= not passed
+            results[i].update({"trigger_rate": rate, "passed": passed})
+            marker = "PASS" if passed else "FAIL"
+            print(f"  [{marker}] rate={rate:.2f} "
+                  f"expect={'+' if expected else '-'} {cases[i]['query'][:70]}")
+    return failed
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--skill", help="only run evals for this skill")
@@ -177,10 +211,14 @@ def main():
                     help='comma-separated provider names / model ids, or "all"')
     ap.add_argument("--runs", type=int, default=3, help="runs per query (default 3)")
     ap.add_argument("--timeout", type=int, default=120, help="seconds per run")
+    ap.add_argument("--jobs", type=int, default=providers.default_jobs(),
+                    help="concurrent agent runs (default: ceil(cpus/2))")
     ap.add_argument("--count-only", action="store_true",
                     help="skip agent runs; only compute token usage per model")
     args = ap.parse_args()
 
+    if not args.count_only:
+        print(f"parallelism: {args.jobs} concurrent agent runs")
     selected = providers.select_models(args.models)
     counter = providers.TokenCounter()
     RESULTS_DIR.mkdir(exist_ok=True)
@@ -203,31 +241,25 @@ def main():
                 mode = "run" if execute else "count-only"
                 print(f"\n=== {skill} / {model['id']} "
                       f"({len(cases)} queries x {args.runs} runs, {mode}) ===")
+                # Token counting stays in this thread (TokenCounter is not
+                # thread-safe and cache-cheap); only agent runs go parallel.
                 results = []
                 for case in cases:
-                    query, expected = case["query"], case["should_trigger"]
-                    tokens = counter.count(provider_key, model["id"], f"{skill_md}\n\n{query}")
-                    entry = {
-                        "query": query,
-                        "should_trigger": expected,
+                    tokens = counter.count(
+                        provider_key, model["id"], f"{skill_md}\n\n{case['query']}",
+                    )
+                    results.append({
+                        "query": case["query"],
+                        "should_trigger": case["should_trigger"],
                         "trigger_rate": None,
                         "passed": None,
                         "input_tokens": tokens,
                         "est_input_cost_usd": providers.input_cost_usd(model, tokens),
-                    }
-                    if execute:
-                        hits = sum(
-                            runner(ws, query, skill, model["id"], args.timeout)
-                            for _ in range(args.runs)
-                        )
-                        rate = hits / args.runs
-                        passed = (rate >= 0.5) if expected else (rate < 0.5)
-                        any_failed |= not passed
-                        entry.update({"trigger_rate": rate, "passed": passed})
-                        marker = "PASS" if passed else "FAIL"
-                        print(f"  [{marker}] rate={rate:.2f} "
-                              f"expect={'+' if expected else '-'} {query[:70]}")
-                    results.append(entry)
+                    })
+                if execute:
+                    any_failed |= run_queries(
+                        runner, ws, skill, model["id"], cases, results, args,
+                    )
 
                 executed = [r for r in results if r["passed"] is not None]
                 token_counts = [r["input_tokens"] for r in results if r["input_tokens"] is not None]

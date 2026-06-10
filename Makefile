@@ -8,12 +8,14 @@
 #   SKILL=name   restrict to one skill (make eval-trigger SKILL=terraform-style)
 #   MODELS=spec  provider names / model ids / "all" (default: anthropic)
 #   RUNS=n       Tier-1 runs per query
+#   JOBS=n       concurrent agent runs (default: ceil(cpus/2))
 
 NPMBIN := ./node_modules/.bin
 
-MODELS ?= anthropic
+MODELS ?= all
 SKILL_FLAG = $(if $(SKILL),--skill $(SKILL))
 RUNS_FLAG  = $(if $(RUNS),--runs $(RUNS))
+JOBS_FLAG  = $(if $(JOBS),--jobs $(JOBS))
 
 # plugins/ ships to end users, so scaffolding templates and bundled configs
 # stay header-free.
@@ -43,10 +45,10 @@ eval-static: ## Tier 0 - frontmatter, manifests, version sync
 	./scripts/check-skills.sh
 
 eval-trigger: ## Tier 1 - trigger accuracy + token usage
-	python3 tools/eval/run_triggers.py --models "$(MODELS)" $(SKILL_FLAG) $(RUNS_FLAG)
+	python3 tools/eval/run_triggers.py --models "$(MODELS)" $(SKILL_FLAG) $(RUNS_FLAG) $(JOBS_FLAG)
 
 eval-behavior: ## Tier 2 - behavioral cases + token usage
-	python3 tools/eval/run_cases.py --models "$(MODELS)" $(SKILL_FLAG)
+	python3 tools/eval/run_cases.py --models "$(MODELS)" $(SKILL_FLAG) $(JOBS_FLAG)
 
 eval: eval-static eval-trigger eval-behavior ## all three tiers
 

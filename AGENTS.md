@@ -80,8 +80,8 @@ make lint                         # markdown style (120-col, config in .markdown
 
 Node CLIs run from `node_modules/.bin` (locked by `package-lock.json` — no npx, no globals); Go developer CLIs are
 pinned in `tools/go.mod` and run via `go tool` (resolved through the root `go.work`). The Makefile also wraps Tiers 1–2
-(`make eval-trigger`, `make eval-behavior`, `make eval` for all three tiers; pass `SKILL=`, `MODELS=`, `RUNS=`) and
-`make report` for the EVALUATION.md files.
+(`make eval-trigger`, `make eval-behavior`, `make eval` for all three tiers; pass `SKILL=`, `MODELS=`, `RUNS=`, `JOBS=`)
+and `make report` for the EVALUATION.md files.
 
 ## Markdown style
 
