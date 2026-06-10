@@ -1,3 +1,6 @@
+# claude
+.claude/plans/
+
 # eval harness output
 evals-results/
 *.eval-results.json
