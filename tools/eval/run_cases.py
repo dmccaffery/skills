@@ -45,8 +45,9 @@ Usage:
   --jobs caps concurrent cases within each model's batch
   (default: ceil(cpus/2)).
 
-Results merge into evals-results/cases-<skill>.json (one entry per model), then
-tools/eval/report.py regenerates EVALUATION.md and plugins/*/EVALUATION.md.
+Results merge into evals-results/cases-<skill>.json (one entry per model,
+persisted as each model finishes), then tools/eval/report.py regenerates
+EVALUATION.md and plugins/*/EVALUATION.md.
 """
 
 import argparse
@@ -352,9 +353,10 @@ def main():
             }
             if executed:
                 print(f"  {sum(r['passed'] for r in executed)}/{len(results)} cases passed")
-
-        out.write_text(json.dumps(data, indent=2) + "\n")
-        print(f"  -> {out.relative_to(REPO)}")
+            # Persist after every model so an interrupted sweep keeps the
+            # models that already finished.
+            out.write_text(json.dumps(data, indent=2) + "\n")
+            print(f"  -> {out.relative_to(REPO)}")
 
     counter.save()
     report.generate()
