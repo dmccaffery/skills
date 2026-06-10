@@ -29,7 +29,12 @@
       { "type": "file_exists", "path": "modules/legacy/outputs.tf" },
       { "type": "regex", "path": "modules/legacy/variables.tf", "pattern": "variable \"name\"" },
       { "type": "regex", "path": "modules/legacy/outputs.tf", "pattern": "output \"bucket\"" },
-      { "type": "command", "run": "terraform init -backend=false -input=false >/dev/null && terraform validate", "cwd": "modules/legacy", "requires": "terraform" }
+      {
+        "type": "command",
+        "run": "terraform init -backend=false -input=false >/dev/null && terraform validate",
+        "cwd": "modules/legacy",
+        "requires": "terraform"
+      }
     ]
   }
 ]

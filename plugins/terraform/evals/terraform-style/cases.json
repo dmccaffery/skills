@@ -13,7 +13,12 @@
       { "type": "regex", "path": "modules/widget/variables.tf", "pattern": "optional\\(" },
       { "type": "regex", "path": "modules/widget/variables.tf", "pattern": "default\\s*=\\s*\\{\\}" },
       { "type": "not_regex", "path": "modules/widget/variables.tf", "pattern": "list\\(string\\)" },
-      { "type": "command", "run": "terraform init -backend=false -input=false >/dev/null && terraform validate", "cwd": "modules/widget", "requires": "terraform" }
+      {
+        "type": "command",
+        "run": "terraform init -backend=false -input=false >/dev/null && terraform validate",
+        "cwd": "modules/widget",
+        "requires": "terraform"
+      }
     ]
   },
   {
@@ -28,7 +33,12 @@
       { "type": "regex", "path": "modules/widget/main.tf", "pattern": "for_each\\s*=\\s*toset\\(" },
       { "type": "not_regex", "path": "modules/widget/main.tf", "pattern": "count\\s*=" },
       { "type": "not_regex", "path": "modules/widget/main.tf", "pattern": "resource\\s+\"[a-z0-9_]+\"\\s+\"this\"" },
-      { "type": "command", "run": "terraform init -backend=false -input=false >/dev/null && terraform validate", "cwd": "modules/widget", "requires": "terraform" }
+      {
+        "type": "command",
+        "run": "terraform init -backend=false -input=false >/dev/null && terraform validate",
+        "cwd": "modules/widget",
+        "requires": "terraform"
+      }
     ]
   }
 ]

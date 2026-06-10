@@ -9,7 +9,12 @@
     },
     "assertions": [
       { "type": "command", "run": "terraform fmt -recursive -check", "requires": "terraform" },
-      { "type": "command", "run": "terraform init -backend=false -input=false >/dev/null && terraform validate", "cwd": "modules/widget", "requires": "terraform" },
+      {
+        "type": "command",
+        "run": "terraform init -backend=false -input=false >/dev/null && terraform validate",
+        "cwd": "modules/widget",
+        "requires": "terraform"
+      },
       { "type": "regex", "path": "modules/widget/main.tf", "pattern": "aws_s3_bucket" }
     ]
   },
