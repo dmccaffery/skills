@@ -11,7 +11,9 @@ skills installed), then grade assertions — deterministic first, LLM-judged las
 Each selected model also gets a token-usage figure per case: the provider's
 token-counting API counts the skill's SKILL.md plus the case prompt, priced at
 the model's input rate (see tools/eval/providers.py). Executed runs additionally
-record the harness-reported usage (input/output tokens) and its cost.
+record the harness-reported usage of the live session — total input tokens
+(including cache writes/reads), output tokens, and cost — per case, with
+per-model totals in the summary.
 
 Runners per provider: Anthropic -> `claude -p`, OpenAI -> `codex exec`.
 Google models are token-counted only (no behavioral runner yet). The LLM judge
@@ -116,7 +118,11 @@ def run_agent_claude(ws, case, model, timeout):
         return proc.stdout, None
     usage = payload.get("usage") or {}
     measured = {
-        "input_tokens": usage.get("input_tokens"),
+        # Cache writes/reads are input tokens too; fold them in so the figure
+        # reflects everything the session consumed (cost_usd already does).
+        "input_tokens": (usage.get("input_tokens") or 0)
+        + (usage.get("cache_creation_input_tokens") or 0)
+        + (usage.get("cache_read_input_tokens") or 0),
         "output_tokens": usage.get("output_tokens"),
         "cost_usd": payload.get("total_cost_usd"),
     } if usage else None
@@ -292,6 +298,10 @@ def main():
             executed = [r for r in results if r["passed"] is not None]
             token_counts = [r["input_tokens"] for r in results if r["input_tokens"] is not None]
             costs = [r["est_input_cost_usd"] for r in results if r["est_input_cost_usd"] is not None]
+            usages = [r["measured"] for r in results if r["measured"]]
+            measured_in = [u["input_tokens"] for u in usages if u.get("input_tokens") is not None]
+            measured_out = [u["output_tokens"] for u in usages if u.get("output_tokens") is not None]
+            measured_costs = [u["cost_usd"] for u in usages if u.get("cost_usd") is not None]
             data["models"][model["id"]] = {
                 "provider": provider_key,
                 "display": model["display"],
@@ -303,6 +313,9 @@ def main():
                     "total": len(results),
                     "input_tokens": sum(token_counts) if token_counts else None,
                     "est_input_cost_usd": round(sum(costs), 6) if costs else None,
+                    "measured_input_tokens": sum(measured_in) if measured_in else None,
+                    "measured_output_tokens": sum(measured_out) if measured_out else None,
+                    "measured_cost_usd": round(sum(measured_costs), 6) if measured_costs else None,
                 },
             }
             if executed:

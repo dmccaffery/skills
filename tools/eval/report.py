@@ -7,10 +7,12 @@
 Two levels, both organised as one section per model provider (Anthropic,
 OpenAI, Google) with one row/subsection per model:
 
-- EVALUATION.md (repo root)            — plugin-level rollup: pass rates,
-  total input tokens, estimated input cost.
+- EVALUATION.md (repo root)            — plugin-level rollup, one triggers
+  table and one cases table per plugin: pass rates, total input tokens,
+  estimated input cost, and (cases) the measured usage of executed runs.
 - plugins/<plugin>/EVALUATION.md       — per-eval detail: every trigger query
-  and behavioral case with its result, token count, and cost.
+  and behavioral case with its result, token count, and cost; case tables
+  also total the measured usage per model.
 
 evals-results/ is gitignored (raw run data stays local); the EVALUATION.md
 files are the committed record. run_triggers.py and run_cases.py call
@@ -40,7 +42,8 @@ marginal context a triggering eval loads), priced at the model's published input
 
 Cells show an em dash when a model has not been evaluated or counted yet, and `n/a` where the
 provider has not published pricing. Behavioral (Tier 2) runs additionally record the
-harness-reported usage of the live session.\
+harness-reported usage of the live session — total input tokens (including cache writes and
+reads), output tokens, and cost.\
 """
 
 REGENERATE = """\
@@ -76,6 +79,14 @@ def fmt_cost(cost, tokens, model):
 
 def fmt_frac(passed, total):
     return "—" if passed is None else f"{passed}/{total}"
+
+
+def fmt_measured_tokens(input_tokens, output_tokens):
+    return "—" if input_tokens is None else f"{input_tokens:,}/{output_tokens or 0:,}"
+
+
+def fmt_usd(cost):
+    return "—" if cost is None else f"${cost:.4f}"
 
 
 def cell(text, limit=70):
@@ -129,6 +140,21 @@ def rollup(kind, skills, model_id):
     return passed, total, tokens, cost
 
 
+def rollup_measured(skills, model_id):
+    """Aggregate measured case usage (input, output, cost) across skills."""
+    tokens_in = tokens_out = cost = None
+    for skill in skills:
+        entry = model_entry("cases", skill, model_id)
+        summary = (entry or {}).get("summary", {})
+        if summary.get("measured_input_tokens") is not None:
+            tokens_in = (tokens_in or 0) + summary["measured_input_tokens"]
+        if summary.get("measured_output_tokens") is not None:
+            tokens_out = (tokens_out or 0) + summary["measured_output_tokens"]
+        if summary.get("measured_cost_usd") is not None:
+            cost = (cost or 0) + summary["measured_cost_usd"]
+    return tokens_in, tokens_out, None if cost is None else round(cost, 4)
+
+
 def root_report(layout):
     lines = [
         "# Evaluation results",
@@ -147,18 +173,34 @@ def root_report(layout):
             lines += [
                 f"### {plugin}",
                 "",
-                "| Model | Triggers | Cases | Input tokens | Est. input cost (USD) |",
-                "| --- | --- | --- | --- | --- |",
+                "#### Triggers",
+                "",
+                "| Model | Passed | Input tokens | Est. input cost (USD) |",
+                "| --- | --- | --- | --- |",
             ]
             for model in provider["models"]:
-                tp, tt, ttok, tcost = rollup("triggers", trigger_skills, model["id"])
-                cp, ct, ctok, ccost = rollup("cases", case_skills, model["id"])
-                tokens = None if ttok is None and ctok is None else (ttok or 0) + (ctok or 0)
-                cost = None if tcost is None and ccost is None else round((tcost or 0) + (ccost or 0), 4)
+                passed, total, tokens, cost = rollup("triggers", trigger_skills, model["id"])
                 lines.append(
                     f"| {model['display']} (`{model['id']}`) "
-                    f"| {fmt_frac(tp, tt)} | {fmt_frac(cp, ct)} "
+                    f"| {fmt_frac(passed, total)} "
                     f"| {fmt_tokens(tokens)} | {fmt_cost(cost, tokens, model)} |"
+                )
+            lines += [
+                "",
+                "#### Cases",
+                "",
+                "| Model | Passed | Input tokens | Est. input cost (USD) "
+                "| Measured tokens (in/out) | Measured cost (USD) |",
+                "| --- | --- | --- | --- | --- | --- |",
+            ]
+            for model in provider["models"]:
+                passed, total, tokens, cost = rollup("cases", case_skills, model["id"])
+                m_in, m_out, m_cost = rollup_measured(case_skills, model["id"])
+                lines.append(
+                    f"| {model['display']} (`{model['id']}`) "
+                    f"| {fmt_frac(passed, total)} "
+                    f"| {fmt_tokens(tokens)} | {fmt_cost(cost, tokens, model)} "
+                    f"| {fmt_measured_tokens(m_in, m_out)} | {fmt_usd(m_cost)} |"
                 )
             lines.append("")
     lines += [REGENERATE, ""]
@@ -205,21 +247,19 @@ def case_table(skill, entry, model):
     for r in entry["results"]:
         result = "—" if r["passed"] is None else ("PASS" if r["passed"] else "FAIL")
         measured = r.get("measured") or {}
-        if measured.get("input_tokens") is not None:
-            measured_tokens = f"{measured['input_tokens']:,}/{measured.get('output_tokens') or 0:,}"
-        else:
-            measured_tokens = "—"
-        measured_cost = "—" if measured.get("cost_usd") is None else f"${measured['cost_usd']:.4f}"
         lines.append(
             f"| {cell(r['id'])} | {result} | {fmt_tokens(r['input_tokens'])} "
             f"| {fmt_cost(r['est_input_cost_usd'], r['input_tokens'], model)} "
-            f"| {measured_tokens} | {measured_cost} |"
+            f"| {fmt_measured_tokens(measured.get('input_tokens'), measured.get('output_tokens'))} "
+            f"| {fmt_usd(measured.get('cost_usd'))} |"
         )
     summary = entry["summary"]
     lines.append(
         f"| **Total** | **{fmt_frac(summary['passed'], summary['total'])}** "
         f"| **{fmt_tokens(summary['input_tokens'])}** "
-        f"| **{fmt_cost(summary['est_input_cost_usd'], summary['input_tokens'], model)}** | | |"
+        f"| **{fmt_cost(summary['est_input_cost_usd'], summary['input_tokens'], model)}** "
+        f"| **{fmt_measured_tokens(summary.get('measured_input_tokens'), summary.get('measured_output_tokens'))}** "
+        f"| **{fmt_usd(summary.get('measured_cost_usd'))}** |"
     )
     lines.append("")
     return lines

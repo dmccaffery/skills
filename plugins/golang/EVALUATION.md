@@ -15,7 +15,8 @@ marginal context a triggering eval loads), priced at the model's published input
 
 Cells show an em dash when a model has not been evaluated or counted yet, and `n/a` where the
 provider has not published pricing. Behavioral (Tier 2) runs additionally record the
-harness-reported usage of the live session.
+harness-reported usage of the live session — total input tokens (including cache writes and
+reads), output tokens, and cost.
 
 ## Anthropic
 
