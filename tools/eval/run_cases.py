@@ -100,6 +100,25 @@ def make_workspace(plugin_dir, files):
     return ws
 
 
+def _run_cli(cmd, ws, timeout):
+    """Run an agent CLI and return its stdout. A timed-out run returns the
+    partial stdout (so the case fails its assertions and the eval moves on)
+    instead of raising TimeoutExpired and aborting the whole run."""
+    try:
+        proc = subprocess.run(
+            cmd, cwd=ws, stdin=subprocess.DEVNULL, capture_output=True,
+            text=True, errors="replace", timeout=timeout,
+        )
+        return proc.stdout
+    except subprocess.TimeoutExpired as exc:
+        out = exc.stdout or ""
+        if isinstance(out, bytes):  # TimeoutExpired carries bytes even in text mode
+            out = out.decode(errors="replace")
+        print(f"  warn: {cmd[0]} timed out after {timeout}s; grading partial output",
+              file=sys.stderr)
+        return out
+
+
 def run_agent_claude(ws, case, model, timeout):
     """Returns (final_output, usage|None). Usage is the CLI-reported token usage."""
     cmd = [
@@ -109,13 +128,11 @@ def run_agent_claude(ws, case, model, timeout):
         "--max-turns", str(case.get("max_turns", 25)),
         "--allowedTools", case.get("allowed_tools", DEFAULT_TOOLS),
     ]
-    proc = subprocess.run(
-        cmd, cwd=ws, capture_output=True, text=True, errors="replace", timeout=timeout,
-    )
+    stdout = _run_cli(cmd, ws, timeout)
     try:
-        payload = json.loads(proc.stdout)
+        payload = json.loads(stdout)
     except json.JSONDecodeError:
-        return proc.stdout, None
+        return stdout, None
     usage = payload.get("usage") or {}
     measured = {
         # Cache writes/reads are input tokens too; fold them in so the figure
@@ -137,11 +154,9 @@ def run_agent_codex(ws, case, model, timeout):
         "--sandbox", "workspace-write",
         "-m", model,
     ]
-    proc = subprocess.run(
-        cmd, cwd=ws, capture_output=True, text=True, errors="replace", timeout=timeout,
-    )
+    stdout = _run_cli(cmd, ws, timeout)
     texts, usage = [], None
-    for line in proc.stdout.splitlines():
+    for line in stdout.splitlines():
         try:
             event = json.loads(line)
         except json.JSONDecodeError:
@@ -155,7 +170,7 @@ def run_agent_codex(ws, case, model, timeout):
                 "output_tokens": event["usage"].get("output_tokens"),
                 "cost_usd": None,
             }
-    return "\n".join(texts) if texts else proc.stdout, usage
+    return "\n".join(texts) if texts else stdout, usage
 
 
 CASE_RUNNERS = {
@@ -203,16 +218,16 @@ def grade(assertion, ws, output, timeout):
         prompt = JUDGE_PROMPT.format(
             assertion=assertion["text"], output=output[:8000], workspace=ws,
         )
-        proc = subprocess.run(
-            ["claude", "-p", prompt, "--output-format", "json", "--max-turns", "4",
-             "--allowedTools", "Read Glob Grep"],
-            capture_output=True, text=True, errors="replace", timeout=timeout,
-        )
         try:
+            proc = subprocess.run(
+                ["claude", "-p", prompt, "--output-format", "json", "--max-turns", "4",
+                 "--allowedTools", "Read Glob Grep"],
+                capture_output=True, text=True, errors="replace", timeout=timeout,
+            )
             result = json.loads(proc.stdout).get("result", "")
             verdict = json.loads(re.search(r"\{.*\}", result, re.DOTALL).group(0))
             return bool(verdict.get("passed")), str(verdict.get("evidence", ""))[:200]
-        except Exception as exc:  # judge output unparseable -> fail loudly
+        except Exception as exc:  # judge timeout or unparseable output -> fail loudly
             return False, f"judge error: {exc}"
 
     return False, f"unknown assertion type: {kind}"

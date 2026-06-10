@@ -35,6 +35,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -68,17 +69,38 @@ def make_workspace(plugin_dir):
     return ws
 
 
-def _scan_jsonl(proc, deadline, line_hit):
+def _scan_jsonl(proc, deadline, line_hit, stderr_log=None):
+    """Scan proc's stdout for a line_hit match until EOF or the deadline.
+
+    The deadline is enforced by a watchdog that kills the process: a per-line
+    clock check never fires while the runner is silent (rate-limit backoff,
+    stalled request), because readline blocks until a line arrives."""
+    timed_out = threading.Event()
+
+    def expire():
+        timed_out.set()
+        proc.kill()
+
+    watchdog = threading.Timer(max(0.0, deadline - time.monotonic()), expire)
+    watchdog.start()
     try:
         for line in proc.stdout:
-            if time.monotonic() > deadline:
-                break
             if line_hit(line):
                 return True
         return False
     finally:
+        watchdog.cancel()
         proc.kill()
         proc.wait()
+        if timed_out.is_set():
+            detail = ""
+            if stderr_log is not None:
+                stderr_log.seek(0)
+                tail = stderr_log.read().strip()[-300:]
+                if tail:
+                    detail = f"; stderr tail: {tail}"
+            print(f"  warn: runner timed out; counted as no-trigger{detail}",
+                  file=sys.stderr)
 
 
 def triggered_claude(ws, query, skill, model, timeout):
@@ -91,8 +113,8 @@ def triggered_claude(ws, query, skill, model, timeout):
         "--allowedTools", "Skill Read",
     ]
     proc = subprocess.Popen(
-        cmd, cwd=ws, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-        text=True, errors="replace",
+        cmd, cwd=ws, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL, text=True, errors="replace",
     )
 
     def hit(line):
@@ -116,20 +138,26 @@ def triggered_claude(ws, query, skill, model, timeout):
 def triggered_codex(ws, query, skill, model, timeout):
     """Best-effort: codex exec event stream mentions the skill's SKILL.md path."""
     cmd = ["codex", "exec", query, "--json", "--skip-git-repo-check", "-m", model]
-    proc = subprocess.Popen(
-        cmd, cwd=ws, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-        text=True, errors="replace",
-    )
-    needle = f"skills/{skill}/SKILL.md"
-    return _scan_jsonl(proc, time.monotonic() + timeout, lambda line: needle in line)
+    # Spool stderr to a file (not a pipe nobody drains) so a timed-out run can
+    # report what codex was complaining about — rate limits, auth, model errors.
+    with tempfile.TemporaryFile(
+        mode="w+", errors="replace", dir=os.environ.get("TMPDIR"),
+    ) as stderr_log:
+        proc = subprocess.Popen(
+            cmd, cwd=ws, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+            stderr=stderr_log, text=True, errors="replace",
+        )
+        needle = f"skills/{skill}/SKILL.md"
+        return _scan_jsonl(proc, time.monotonic() + timeout,
+                           lambda line: needle in line, stderr_log=stderr_log)
 
 
 def triggered_gemini(ws, query, skill, model, timeout):
     """Best-effort: gemini CLI output mentions the skill's SKILL.md path."""
     cmd = ["gemini", "-p", query, "-m", model, "--output-format", "json"]
     proc = subprocess.Popen(
-        cmd, cwd=ws, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-        text=True, errors="replace",
+        cmd, cwd=ws, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL, text=True, errors="replace",
     )
     needle = f"skills/{skill}/SKILL.md"
     return _scan_jsonl(proc, time.monotonic() + timeout, lambda line: needle in line)
