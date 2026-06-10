@@ -1,16 +1,31 @@
 #!/usr/bin/env python3
-"""Tier 1 trigger-accuracy evals.
+# Copyright 2026 Bitwise Media Group
+# SPDX-License-Identifier: MIT
+
+"""Tier 1 trigger-accuracy evals, per provider model.
 
 For every plugins/*/evals/<skill>/triggers.json, run each query through a headless
-`claude -p` session in a throwaway workspace where the plugin's skills are installed,
+agent session in a throwaway workspace where the plugin's skills are installed,
 and check whether the skill under test activates. A query passes when its observed
 trigger rate agrees with `should_trigger` (threshold 0.5).
 
-Usage:
-  python3 tools/eval/run_triggers.py [--skill NAME] [--runs N] [--timeout SECS]
+Each selected model also gets a token-usage figure per query: the provider's
+token-counting API is asked to count the skill's SKILL.md plus the query — the
+marginal context a triggering eval loads — and the count is priced at the model's
+input rate (see tools/eval/providers.py).
 
-Requires the `claude` CLI on PATH and an authenticated session / API key.
-Results are written to evals-results/triggers-<skill>.json.
+Runners per provider: Anthropic -> `claude -p`, OpenAI -> `codex exec`,
+Google -> `gemini -p`. Models whose runner CLI is missing are token-counted only.
+
+Usage:
+  python3 tools/eval/run_triggers.py [--skill NAME] [--models SPEC] [--runs N]
+                                     [--timeout SECS] [--count-only]
+
+  --models accepts provider names, model ids, or "all" (comma-separated).
+  Default: "anthropic" (all four Anthropic models).
+
+Results merge into evals-results/triggers-<skill>.json (one entry per model),
+then tools/eval/report.py regenerates EVALUATION.md and plugins/*/EVALUATION.md.
 """
 
 import argparse
@@ -21,10 +36,14 @@ import subprocess
 import sys
 import tempfile
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
-RESULTS_DIR = REPO / "evals-results"
+import providers
+import report
+
+REPO = providers.REPO
+RESULTS_DIR = providers.RESULTS_DIR
 
 
 def eval_sets(skill_filter):
@@ -37,21 +56,36 @@ def eval_sets(skill_filter):
 
 
 def make_workspace(plugin_dir):
-    """Throwaway project dir with ALL of the plugin's skills installed, so the
-    skill under test has to win against its siblings (near-miss negatives)."""
+    """Throwaway project dir with ALL of the plugin's skills installed (so the
+    skill under test has to win against its siblings), linked everywhere the
+    supported runners look: .claude/skills, .agents/skills, .gemini/skills."""
     ws = Path(tempfile.mkdtemp(prefix="triggers.", dir=os.environ.get("TMPDIR")))
-    skills_dir = ws / ".claude" / "skills"
-    skills_dir.mkdir(parents=True)
-    for sk in sorted((plugin_dir / "skills").iterdir()):
-        if (sk / "SKILL.md").is_file():
-            (skills_dir / sk.name).symlink_to(sk)
+    for skills_dir in (ws / ".claude" / "skills", ws / ".agents" / "skills", ws / ".gemini" / "skills"):
+        skills_dir.mkdir(parents=True)
+        for sk in sorted((plugin_dir / "skills").iterdir()):
+            if (sk / "SKILL.md").is_file():
+                (skills_dir / sk.name).symlink_to(sk)
     return ws
 
 
-def skill_triggered(ws, query, skill, timeout):
-    """Run one headless session; True if a Skill/Read tool_use targets `skill`."""
+def _scan_jsonl(proc, deadline, line_hit):
+    try:
+        for line in proc.stdout:
+            if time.monotonic() > deadline:
+                break
+            if line_hit(line):
+                return True
+        return False
+    finally:
+        proc.kill()
+        proc.wait()
+
+
+def triggered_claude(ws, query, skill, model, timeout):
+    """True if a Skill/Read tool_use in the session targets `skill`."""
     cmd = [
         "claude", "-p", query,
+        "--model", model,
         "--output-format", "stream-json", "--verbose",
         "--max-turns", "2",
         "--allowedTools", "Skill Read",
@@ -60,70 +94,140 @@ def skill_triggered(ws, query, skill, timeout):
         cmd, cwd=ws, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
         text=True, errors="replace",
     )
-    deadline = time.monotonic() + timeout
-    try:
-        for line in proc.stdout:
-            if time.monotonic() > deadline:
-                break
-            try:
-                event = json.loads(line)
-            except json.JSONDecodeError:
+
+    def hit(line):
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            return False
+        for block in (event.get("message") or {}).get("content") or []:
+            if block.get("type") != "tool_use":
                 continue
-            for block in (event.get("message") or {}).get("content") or []:
-                if block.get("type") != "tool_use":
-                    continue
-                payload = json.dumps(block.get("input") or {})
-                if block.get("name") == "Skill" and skill in payload:
-                    return True
-                if block.get("name") == "Read" and f"skills/{skill}/SKILL.md" in payload:
-                    return True
+            payload = json.dumps(block.get("input") or {})
+            if block.get("name") == "Skill" and skill in payload:
+                return True
+            if block.get("name") == "Read" and f"skills/{skill}/SKILL.md" in payload:
+                return True
         return False
-    finally:
-        proc.kill()
-        proc.wait()
+
+    return _scan_jsonl(proc, time.monotonic() + timeout, hit)
+
+
+def triggered_codex(ws, query, skill, model, timeout):
+    """Best-effort: codex exec event stream mentions the skill's SKILL.md path."""
+    cmd = ["codex", "exec", query, "--json", "--skip-git-repo-check", "-m", model]
+    proc = subprocess.Popen(
+        cmd, cwd=ws, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        text=True, errors="replace",
+    )
+    needle = f"skills/{skill}/SKILL.md"
+    return _scan_jsonl(proc, time.monotonic() + timeout, lambda line: needle in line)
+
+
+def triggered_gemini(ws, query, skill, model, timeout):
+    """Best-effort: gemini CLI output mentions the skill's SKILL.md path."""
+    cmd = ["gemini", "-p", query, "-m", model, "--output-format", "json"]
+    proc = subprocess.Popen(
+        cmd, cwd=ws, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        text=True, errors="replace",
+    )
+    needle = f"skills/{skill}/SKILL.md"
+    return _scan_jsonl(proc, time.monotonic() + timeout, lambda line: needle in line)
+
+
+TRIGGER_RUNNERS = {
+    "anthropic": triggered_claude,
+    "openai": triggered_codex,
+    "google": triggered_gemini,
+}
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--skill", help="only run evals for this skill")
+    ap.add_argument("--models", default="anthropic",
+                    help='comma-separated provider names / model ids, or "all"')
     ap.add_argument("--runs", type=int, default=3, help="runs per query (default 3)")
     ap.add_argument("--timeout", type=int, default=120, help="seconds per run")
+    ap.add_argument("--count-only", action="store_true",
+                    help="skip agent runs; only compute token usage per model")
     args = ap.parse_args()
 
-    if not shutil.which("claude"):
-        sys.exit("error: `claude` CLI not found on PATH")
-
+    selected = providers.select_models(args.models)
+    counter = providers.TokenCounter()
     RESULTS_DIR.mkdir(exist_ok=True)
     any_failed = False
 
     for plugin_dir, skill, cases in eval_sets(args.skill):
+        out = RESULTS_DIR / f"triggers-{skill}.json"
+        data = providers.load_results(out, plugin_dir.name, skill)
+        skill_md = (plugin_dir / "skills" / skill / "SKILL.md").read_text()
         ws = make_workspace(plugin_dir)
-        results = []
-        print(f"\n=== {skill} ({len(cases)} queries x {args.runs} runs) ===")
         try:
-            for case in cases:
-                query, expected = case["query"], case["should_trigger"]
-                hits = sum(
-                    skill_triggered(ws, query, skill, args.timeout)
-                    for _ in range(args.runs)
-                )
-                rate = hits / args.runs
-                passed = (rate >= 0.5) if expected else (rate < 0.5)
-                any_failed |= not passed
-                results.append({
-                    "query": query, "should_trigger": expected,
-                    "trigger_rate": rate, "passed": passed,
-                })
-                marker = "PASS" if passed else "FAIL"
-                print(f"  [{marker}] rate={rate:.2f} expect={'+' if expected else '-'} {query[:70]}")
+            for provider_key, model in selected:
+                runner = TRIGGER_RUNNERS[provider_key]
+                binary = providers.PROVIDERS[provider_key]["runner"]
+                execute = not args.count_only and shutil.which(binary) is not None
+                if not execute and not args.count_only:
+                    print(f"  warn: `{binary}` CLI not found; "
+                          f"{model['id']} gets token counts only", file=sys.stderr)
+
+                mode = "run" if execute else "count-only"
+                print(f"\n=== {skill} / {model['id']} "
+                      f"({len(cases)} queries x {args.runs} runs, {mode}) ===")
+                results = []
+                for case in cases:
+                    query, expected = case["query"], case["should_trigger"]
+                    tokens = counter.count(provider_key, model["id"], f"{skill_md}\n\n{query}")
+                    entry = {
+                        "query": query,
+                        "should_trigger": expected,
+                        "trigger_rate": None,
+                        "passed": None,
+                        "input_tokens": tokens,
+                        "est_input_cost_usd": providers.input_cost_usd(model, tokens),
+                    }
+                    if execute:
+                        hits = sum(
+                            runner(ws, query, skill, model["id"], args.timeout)
+                            for _ in range(args.runs)
+                        )
+                        rate = hits / args.runs
+                        passed = (rate >= 0.5) if expected else (rate < 0.5)
+                        any_failed |= not passed
+                        entry.update({"trigger_rate": rate, "passed": passed})
+                        marker = "PASS" if passed else "FAIL"
+                        print(f"  [{marker}] rate={rate:.2f} "
+                              f"expect={'+' if expected else '-'} {query[:70]}")
+                    results.append(entry)
+
+                executed = [r for r in results if r["passed"] is not None]
+                token_counts = [r["input_tokens"] for r in results if r["input_tokens"] is not None]
+                costs = [r["est_input_cost_usd"] for r in results if r["est_input_cost_usd"] is not None]
+                data["models"][model["id"]] = {
+                    "provider": provider_key,
+                    "display": model["display"],
+                    "executed": bool(executed),
+                    "ran_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                    "runs_per_query": args.runs if executed else None,
+                    "results": results,
+                    "summary": {
+                        "passed": sum(r["passed"] for r in executed) if executed else None,
+                        "total": len(results),
+                        "input_tokens": sum(token_counts) if token_counts else None,
+                        "est_input_cost_usd": round(sum(costs), 6) if costs else None,
+                    },
+                }
+                if executed:
+                    print(f"  {sum(r['passed'] for r in executed)}/{len(results)} queries passed")
         finally:
             shutil.rmtree(ws, ignore_errors=True)
 
-        out = RESULTS_DIR / f"triggers-{skill}.json"
-        out.write_text(json.dumps(results, indent=2) + "\n")
-        passed_n = sum(r["passed"] for r in results)
-        print(f"  {passed_n}/{len(results)} queries passed -> {out.relative_to(REPO)}")
+        out.write_text(json.dumps(data, indent=2) + "\n")
+        print(f"  -> {out.relative_to(REPO)}")
 
+    counter.save()
+    report.generate()
     sys.exit(1 if any_failed else 0)
 
 

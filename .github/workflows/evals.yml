@@ -1,7 +1,12 @@
+# Copyright 2026 Bitwise Media Group
+# SPDX-License-Identifier: MIT
+
 name: evals
 
 # Tier 1 (trigger accuracy) and Tier 2 (behavioral) evals run real headless
-# Claude sessions, so they cost tokens and need ANTHROPIC_API_KEY — manual only.
+# agent sessions, so they cost tokens and need provider API keys — manual only.
+# Anthropic models run via `claude`, OpenAI via `codex`, Google via `gemini`;
+# models whose CLI/key is unavailable get token counts only.
 on:
   workflow_dispatch:
     inputs:
@@ -15,18 +20,28 @@ on:
         default: triggers
         type: choice
         options: [triggers, cases, both]
+      models:
+        description: Models to evaluate (provider names, model ids, or "all")
+        required: true
+        default: anthropic
+        type: string
 
 jobs:
   evals:
     runs-on: ubuntu-latest
     env:
+      # Either Anthropic credential works: the claude CLI and the token-counting
+      # client accept an API key or a long-lived OAuth token (claude setup-token).
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install -g @anthropic-ai/claude-code
+      - run: npm install -g @anthropic-ai/claude-code @openai/codex @google/gemini-cli
       - name: Install terraform + tflint for deterministic grading
         if: ${{ inputs.tier != 'triggers' }}
         run: |
@@ -36,16 +51,21 @@ jobs:
         if: ${{ inputs.tier == 'triggers' || inputs.tier == 'both' }}
         run: |
           python3 tools/eval/run_triggers.py \
+            --models '${{ inputs.models }}' \
             ${{ inputs.skill && format('--skill {0}', inputs.skill) || '' }}
       - name: Tier 2 — behavioral cases
         if: ${{ inputs.tier == 'cases' || inputs.tier == 'both' }}
         run: |
           python3 tools/eval/run_cases.py \
+            --models '${{ inputs.models }}' \
             ${{ inputs.skill && format('--skill {0}', inputs.skill) || '' }}
-      - name: Upload results
+      - name: Upload results and reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: evals-results
-          path: evals-results/
+          path: |
+            evals-results/
+            EVALUATION.md
+            plugins/*/EVALUATION.md
           if-no-files-found: ignore

@@ -9,3 +9,6 @@ node_modules/
 # OS noise
 .DS_Store
 *.log
+
+# python build artifacts
+__pycache__/

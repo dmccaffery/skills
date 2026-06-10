@@ -1,9 +1,22 @@
 #!/usr/bin/env python3
-"""Tier 2 behavioral evals.
+# Copyright 2026 Bitwise Media Group
+# SPDX-License-Identifier: MIT
+
+"""Tier 2 behavioral evals, per provider model.
 
 For every plugins/*/evals/<skill>/cases.json, run each case's prompt through a
-headless `claude -p` session in a throwaway fixture workspace (with the plugin's
+headless agent session in a throwaway fixture workspace (with the plugin's
 skills installed), then grade assertions — deterministic first, LLM-judged last.
+
+Each selected model also gets a token-usage figure per case: the provider's
+token-counting API counts the skill's SKILL.md plus the case prompt, priced at
+the model's input rate (see tools/eval/providers.py). Executed runs additionally
+record the harness-reported usage (input/output tokens) and its cost.
+
+Runners per provider: Anthropic -> `claude -p`, OpenAI -> `codex exec`.
+Google models are token-counted only (no behavioral runner yet). The LLM judge
+for `llm` assertions always runs through `claude` regardless of the model under
+test, so grading stays comparable across providers.
 
 Case schema:
   {
@@ -22,10 +35,14 @@ Case schema:
   }
 
 Usage:
-  python3 tools/eval/run_cases.py [--skill NAME] [--case ID] [--timeout SECS]
+  python3 tools/eval/run_cases.py [--skill NAME] [--case ID] [--models SPEC]
+                                  [--timeout SECS] [--count-only]
 
-Requires the `claude` CLI; `requires:`-guarded command assertions skip when the
-named binary is missing. Results land in evals-results/cases-<skill>.json.
+  --models accepts provider names, model ids, or "all" (comma-separated).
+  Default: "anthropic" (all four Anthropic models).
+
+Results merge into evals-results/cases-<skill>.json (one entry per model), then
+tools/eval/report.py regenerates EVALUATION.md and plugins/*/EVALUATION.md.
 """
 
 import argparse
@@ -36,10 +53,14 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
-RESULTS_DIR = REPO / "evals-results"
+import providers
+import report
+
+REPO = providers.REPO
+RESULTS_DIR = providers.RESULTS_DIR
 DEFAULT_TOOLS = "Read Write Edit Glob Grep Skill Bash(terraform *) Bash(tflint *) Bash(mkdir *)"
 JUDGE_PROMPT = """You are grading an AI coding agent's work. Assertion to verify:
 
@@ -65,11 +86,11 @@ def eval_sets(skill_filter):
 
 def make_workspace(plugin_dir, files):
     ws = Path(tempfile.mkdtemp(prefix="cases.", dir=os.environ.get("TMPDIR")))
-    skills_dir = ws / ".claude" / "skills"
-    skills_dir.mkdir(parents=True)
-    for sk in sorted((plugin_dir / "skills").iterdir()):
-        if (sk / "SKILL.md").is_file():
-            (skills_dir / sk.name).symlink_to(sk)
+    for skills_dir in (ws / ".claude" / "skills", ws / ".agents" / "skills"):
+        skills_dir.mkdir(parents=True)
+        for sk in sorted((plugin_dir / "skills").iterdir()):
+            if (sk / "SKILL.md").is_file():
+                (skills_dir / sk.name).symlink_to(sk)
     for rel, content in (files or {}).items():
         path = ws / rel
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -77,20 +98,64 @@ def make_workspace(plugin_dir, files):
     return ws
 
 
-def run_agent(ws, prompt, max_turns, timeout, allowed_tools):
+def run_agent_claude(ws, case, model, timeout):
+    """Returns (final_output, usage|None). Usage is the CLI-reported token usage."""
     cmd = [
-        "claude", "-p", prompt,
+        "claude", "-p", case["prompt"],
+        "--model", model,
         "--output-format", "json",
-        "--max-turns", str(max_turns),
-        "--allowedTools", allowed_tools,
+        "--max-turns", str(case.get("max_turns", 25)),
+        "--allowedTools", case.get("allowed_tools", DEFAULT_TOOLS),
     ]
     proc = subprocess.run(
         cmd, cwd=ws, capture_output=True, text=True, errors="replace", timeout=timeout,
     )
     try:
-        return json.loads(proc.stdout).get("result", "")
+        payload = json.loads(proc.stdout)
     except json.JSONDecodeError:
-        return proc.stdout
+        return proc.stdout, None
+    usage = payload.get("usage") or {}
+    measured = {
+        "input_tokens": usage.get("input_tokens"),
+        "output_tokens": usage.get("output_tokens"),
+        "cost_usd": payload.get("total_cost_usd"),
+    } if usage else None
+    return payload.get("result", ""), measured
+
+
+def run_agent_codex(ws, case, model, timeout):
+    """Best-effort codex exec run: concatenates agent messages, captures usage."""
+    cmd = [
+        "codex", "exec", case["prompt"],
+        "--json", "--skip-git-repo-check",
+        "--sandbox", "workspace-write",
+        "-m", model,
+    ]
+    proc = subprocess.run(
+        cmd, cwd=ws, capture_output=True, text=True, errors="replace", timeout=timeout,
+    )
+    texts, usage = [], None
+    for line in proc.stdout.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        item = event.get("item") or {}
+        if event.get("type") == "item.completed" and item.get("type") == "agent_message":
+            texts.append(item.get("text", ""))
+        if event.get("type") == "turn.completed" and event.get("usage"):
+            usage = {
+                "input_tokens": event["usage"].get("input_tokens"),
+                "output_tokens": event["usage"].get("output_tokens"),
+                "cost_usd": None,
+            }
+    return "\n".join(texts) if texts else proc.stdout, usage
+
+
+CASE_RUNNERS = {
+    "anthropic": run_agent_claude,
+    "openai": run_agent_codex,
+}
 
 
 def grade(assertion, ws, output, timeout):
@@ -147,51 +212,107 @@ def grade(assertion, ws, output, timeout):
     return False, f"unknown assertion type: {kind}"
 
 
+def run_case(plugin_dir, skill, case, provider_key, model, args):
+    runner = CASE_RUNNERS[provider_key]
+    ws = make_workspace(plugin_dir, case.get("files"))
+    try:
+        output, measured = runner(ws, case, model["id"], args.timeout)
+        graded = []
+        for assertion in case["assertions"]:
+            passed, evidence = grade(assertion, ws, output, args.timeout)
+            graded.append({**assertion, "passed": passed, "evidence": evidence})
+            marker = "SKIP" if passed is None else ("PASS" if passed else "FAIL")
+            label = assertion.get("text") or assertion.get("pattern") \
+                or assertion.get("run") or assertion.get("path")
+            print(f"  [{marker}] {case['id']}: {label}")
+        case_passed = all(g["passed"] is not False for g in graded)
+        if measured:
+            measured["cost_usd"] = measured.get("cost_usd") \
+                or providers.usage_cost_usd(model, measured)
+        return case_passed, graded, measured
+    finally:
+        shutil.rmtree(ws, ignore_errors=True)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--skill", help="only run evals for this skill")
     ap.add_argument("--case", help="only run the case with this id")
+    ap.add_argument("--models", default="anthropic",
+                    help='comma-separated provider names / model ids, or "all"')
     ap.add_argument("--timeout", type=int, default=600, help="seconds per agent run")
+    ap.add_argument("--count-only", action="store_true",
+                    help="skip agent runs; only compute token usage per model")
     args = ap.parse_args()
 
-    if not shutil.which("claude"):
-        sys.exit("error: `claude` CLI not found on PATH")
-
+    selected = providers.select_models(args.models)
+    counter = providers.TokenCounter()
     RESULTS_DIR.mkdir(exist_ok=True)
     any_failed = False
 
     for plugin_dir, skill, cases in eval_sets(args.skill):
-        results = []
-        print(f"\n=== {skill} ===")
-        for case in cases:
-            if args.case and case["id"] != args.case:
-                continue
-            ws = make_workspace(plugin_dir, case.get("files"))
-            try:
-                output = run_agent(
-                    ws, case["prompt"], case.get("max_turns", 25),
-                    args.timeout, case.get("allowed_tools", DEFAULT_TOOLS),
+        cases = [c for c in cases if not args.case or c["id"] == args.case]
+        if not cases:
+            continue
+        out = RESULTS_DIR / f"cases-{skill}.json"
+        data = providers.load_results(out, plugin_dir.name, skill)
+        skill_md = (plugin_dir / "skills" / skill / "SKILL.md").read_text()
+
+        for provider_key, model in selected:
+            runner_available = provider_key in CASE_RUNNERS \
+                and shutil.which(providers.PROVIDERS[provider_key]["runner"]) is not None
+            execute = runner_available and not args.count_only
+            if not execute and not args.count_only:
+                print(f"  warn: no behavioral runner for {model['id']}; "
+                      f"token counts only", file=sys.stderr)
+
+            mode = "run" if execute else "count-only"
+            print(f"\n=== {skill} / {model['id']} ({mode}) ===")
+            results = []
+            for case in cases:
+                tokens = counter.count(
+                    provider_key, model["id"], f"{skill_md}\n\n{case['prompt']}",
                 )
-                graded = []
-                for assertion in case["assertions"]:
-                    passed, evidence = grade(assertion, ws, output, args.timeout)
-                    graded.append({**assertion, "passed": passed, "evidence": evidence})
-                    marker = "SKIP" if passed is None else ("PASS" if passed else "FAIL")
-                    label = assertion.get("text") or assertion.get("pattern") \
-                        or assertion.get("run") or assertion.get("path")
-                    print(f"  [{marker}] {case['id']}: {label}")
-                case_passed = all(g["passed"] is not False for g in graded)
-                any_failed |= not case_passed
-                results.append({"id": case["id"], "passed": case_passed, "assertions": graded})
-            finally:
-                shutil.rmtree(ws, ignore_errors=True)
+                entry = {
+                    "id": case["id"],
+                    "passed": None,
+                    "assertions": None,
+                    "input_tokens": tokens,
+                    "est_input_cost_usd": providers.input_cost_usd(model, tokens),
+                    "measured": None,
+                }
+                if execute:
+                    passed, graded, measured = run_case(
+                        plugin_dir, skill, case, provider_key, model, args,
+                    )
+                    any_failed |= not passed
+                    entry.update({"passed": passed, "assertions": graded, "measured": measured})
+                results.append(entry)
 
-        if results:
-            out = RESULTS_DIR / f"cases-{skill}.json"
-            out.write_text(json.dumps(results, indent=2) + "\n")
-            passed_n = sum(r["passed"] for r in results)
-            print(f"  {passed_n}/{len(results)} cases passed -> {out.relative_to(REPO)}")
+            executed = [r for r in results if r["passed"] is not None]
+            token_counts = [r["input_tokens"] for r in results if r["input_tokens"] is not None]
+            costs = [r["est_input_cost_usd"] for r in results if r["est_input_cost_usd"] is not None]
+            data["models"][model["id"]] = {
+                "provider": provider_key,
+                "display": model["display"],
+                "executed": bool(executed),
+                "ran_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "results": results,
+                "summary": {
+                    "passed": sum(r["passed"] for r in executed) if executed else None,
+                    "total": len(results),
+                    "input_tokens": sum(token_counts) if token_counts else None,
+                    "est_input_cost_usd": round(sum(costs), 6) if costs else None,
+                },
+            }
+            if executed:
+                print(f"  {sum(r['passed'] for r in executed)}/{len(results)} cases passed")
 
+        out.write_text(json.dumps(data, indent=2) + "\n")
+        print(f"  -> {out.relative_to(REPO)}")
+
+    counter.save()
+    report.generate()
     sys.exit(1 if any_failed else 0)
 
 
