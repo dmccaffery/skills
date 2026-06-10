@@ -40,11 +40,15 @@ Case schema:
 Usage:
   python3 tools/eval/run_cases.py [--skill NAME] [--case ID] [--models SPEC]
                                   [--timeout SECS] [--jobs N] [--count-only]
+                                  [--new]
 
   --models accepts provider names, model ids, or "all" (comma-separated).
   Default: "anthropic" (all four Anthropic models).
   --jobs caps concurrent cases within each model's batch
   (default: ceil(cpus/2)).
+  --new skips skill/model entries whose stored results are already complete —
+  a result is incomplete when its timing, input, output, or cost values are
+  missing. Skills, models, and cases with no stored result always run.
 
 Results merge into evals-results/cases-<skill>.json (one entry per model,
 persisted as each model finishes), then tools/eval/report.py regenerates
@@ -90,6 +94,34 @@ def eval_sets(skill_filter):
         if skill_filter and skill != skill_filter:
             continue
         yield plugin_dir, skill, json.loads(cases.read_text())
+
+
+def needs_run(entry, cases, model, execute):
+    """Whether --new should (re)run this skill/model: True when any current
+    case has no stored result, or a stored result is missing its timing
+    (run_seconds), input (input_tokens, measured input), output (passed,
+    measured output tokens), or cost (est_input_cost_usd, measured cost)
+    values. Fields a run could never fill are exempt: costs for models
+    without published pricing, and the execution fields when this invocation
+    is count-only."""
+    stored = {r.get("id"): r for r in (entry or {}).get("results") or []}
+    priced = model["input"] is not None and model["output"] is not None
+    for case in cases:
+        result = stored.get(case["id"])
+        if result is None:
+            return True
+        required = [result.get("input_tokens")]
+        if model["input"] is not None:
+            required.append(result.get("est_input_cost_usd"))
+        if execute:
+            measured = result.get("measured") or {}
+            required += [result.get("passed"), result.get("run_seconds"),
+                         measured.get("input_tokens"), measured.get("output_tokens")]
+            if priced:
+                required.append(measured.get("cost_usd"))
+        if any(value is None for value in required):
+            return True
+    return False
 
 
 def make_workspace(plugin_dir, files):
@@ -278,6 +310,9 @@ def main():
                     help="concurrent cases (default: ceil(cpus/2))")
     ap.add_argument("--count-only", action="store_true",
                     help="skip agent runs; only compute token usage per model")
+    ap.add_argument("--new", action="store_true",
+                    help="only run evals whose stored results are missing "
+                         "timing, input, output, or cost values")
     args = ap.parse_args()
 
     if not args.count_only:
@@ -299,6 +334,11 @@ def main():
             runner_available = provider_key in CASE_RUNNERS \
                 and shutil.which(providers.PROVIDERS[provider_key]["runner"]) is not None
             execute = runner_available and not args.count_only
+            if args.new and not needs_run(
+                data["models"].get(model["id"]), cases, model, execute,
+            ):
+                print(f"\n=== {skill} / {model['id']} (skip: results complete) ===")
+                continue
             if not execute and not args.count_only:
                 print(f"  warn: no behavioral runner for {model['id']}; "
                       f"token counts only", file=sys.stderr)

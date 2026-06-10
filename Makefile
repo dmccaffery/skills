@@ -9,6 +9,7 @@
 #   MODELS=spec  provider names / model ids / "all" (default: anthropic)
 #   RUNS=n       Tier-1 runs per query
 #   JOBS=n       concurrent agent runs (default: ceil(cpus/2))
+#   NEW=1        only run evals whose stored results are missing/incomplete
 
 NPMBIN := ./node_modules/.bin
 
@@ -16,6 +17,7 @@ MODELS ?= all
 SKILL_FLAG = $(if $(SKILL),--skill $(SKILL))
 RUNS_FLAG  = $(if $(RUNS),--runs $(RUNS))
 JOBS_FLAG  = $(if $(JOBS),--jobs $(JOBS))
+NEW_FLAG   = $(if $(NEW),--new)
 
 # plugins/ ships to end users, so scaffolding templates and bundled configs
 # stay header-free.
@@ -45,10 +47,10 @@ eval-static: ## Tier 0 - frontmatter, manifests, version sync
 	python3 tools/eval/run_checks.py
 
 eval-trigger: ## Tier 1 - trigger accuracy + token usage
-	python3 tools/eval/run_triggers.py --models "$(MODELS)" $(SKILL_FLAG) $(RUNS_FLAG) $(JOBS_FLAG)
+	python3 tools/eval/run_triggers.py --models "$(MODELS)" $(SKILL_FLAG) $(RUNS_FLAG) $(JOBS_FLAG) $(NEW_FLAG)
 
 eval-behavior: ## Tier 2 - behavioral cases + token usage
-	python3 tools/eval/run_cases.py --models "$(MODELS)" $(SKILL_FLAG) $(JOBS_FLAG)
+	python3 tools/eval/run_cases.py --models "$(MODELS)" $(SKILL_FLAG) $(JOBS_FLAG) $(NEW_FLAG)
 
 eval: eval-static eval-trigger eval-behavior ## all three tiers
 
