@@ -26,18 +26,18 @@ run"/"Run" columns): per-query averages across runs for triggers, per-case agent
 
 | Provider | Model | Passed | Avg run | Input tokens | Est. input cost (USD) |
 | --- | --- | --- | --- | --- | --- |
-| Anthropic | Claude Haiku 4.5 (`claude-haiku-4-5`) | 9/13 | 8.5s | 66,448 | $0.0664 |
-| Anthropic | Claude Sonnet 4.6 (`claude-sonnet-4-6`) | 10/13 | 13.2s | 66,448 | $0.1993 |
-| Anthropic | Claude Opus 4.8 (`claude-opus-4-8`) | 11/13 | 15.2s | 89,313 | $0.4466 |
-| Anthropic | Claude Fable 5 (`claude-fable-5`) | — | — | 89,313 | $0.8931 |
-| OpenAI | GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`) | 11/13 | — | — | — |
-| OpenAI | GPT-5.4 Mini (`gpt-5.4-mini`) | 12/13 | — | 57,410 | $0.0431 |
-| OpenAI | GPT-5.4 (`gpt-5.4`) | 13/13 | — | 57,410 | $0.1435 |
-| OpenAI | GPT-5.5 (`gpt-5.5`) | 12/13 | — | 57,410 | $0.2870 |
-| Google | Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`) | 6/13 | — | 14,986 | $0.0037 |
-| Google | Gemini 3 Flash (preview) (`gemini-3-flash-preview`) | 6/13 | — | 14,986 | $0.0075 |
-| Google | Gemini 3.5 Flash (`gemini-3.5-flash`) | 6/13 | — | 14,986 | $0.0225 |
-| Google | Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`) | 6/13 | — | 14,986 | $0.0300 |
+| Anthropic | Claude Haiku 4.5 (`claude-haiku-4-5`) | 30/52 | 8.4s | 66,448 | $0.0664 |
+| Anthropic | Claude Sonnet 4.6 (`claude-sonnet-4-6`) | 35/52 | 12.7s | 66,448 | $0.1993 |
+| Anthropic | Claude Opus 4.8 (`claude-opus-4-8`) | 37/52 | 14.7s | 89,313 | $0.4466 |
+| Anthropic | Claude Fable 5 (`claude-fable-5`) | 52/52 | 13.8s | 89,313 | $0.8931 |
+| OpenAI | GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`) | 33/52 | 25.7s | — | — |
+| OpenAI | GPT-5.4 Mini (`gpt-5.4-mini`) | 45/52 | 41.4s | 57,410 | $0.0431 |
+| OpenAI | GPT-5.4 (`gpt-5.4`) | 48/52 | 39.6s | 57,410 | $0.1435 |
+| OpenAI | GPT-5.5 (`gpt-5.5`) | 49/52 | 42.5s | 57,410 | $0.2870 |
+| Google | Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`) | 24/52 | 2.8s | 61,853 | $0.0155 |
+| Google | Gemini 3 Flash (preview) (`gemini-3-flash-preview`) | 24/52 | 2.5s | 61,853 | $0.0309 |
+| Google | Gemini 3.5 Flash (`gemini-3.5-flash`) | 24/52 | 2.5s | 61,853 | $0.0928 |
+| Google | Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`) | 24/52 | 2.5s | 61,853 | $0.1237 |
 
 ### Cases
 
@@ -62,18 +62,18 @@ run"/"Run" columns): per-query averages across runs for triggers, per-case agent
 
 | Provider | Model | Passed | Avg run | Input tokens | Est. input cost (USD) |
 | --- | --- | --- | --- | --- | --- |
-| Anthropic | Claude Haiku 4.5 (`claude-haiku-4-5`) | — | — | 33,924 | $0.0339 |
-| Anthropic | Claude Sonnet 4.6 (`claude-sonnet-4-6`) | — | — | 33,924 | $0.1018 |
-| Anthropic | Claude Opus 4.8 (`claude-opus-4-8`) | — | — | 45,860 | $0.2293 |
-| Anthropic | Claude Fable 5 (`claude-fable-5`) | — | — | 45,860 | $0.4586 |
-| OpenAI | GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`) | — | — | — | — |
-| OpenAI | GPT-5.4 Mini (`gpt-5.4-mini`) | — | — | 29,022 | $0.0218 |
-| OpenAI | GPT-5.4 (`gpt-5.4`) | — | — | 29,022 | $0.0726 |
-| OpenAI | GPT-5.5 (`gpt-5.5`) | — | — | 29,022 | $0.1451 |
-| Google | Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`) | — | — | — | — |
-| Google | Gemini 3 Flash (preview) (`gemini-3-flash-preview`) | — | — | — | — |
-| Google | Gemini 3.5 Flash (`gemini-3.5-flash`) | — | — | — | — |
-| Google | Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`) | — | — | — | — |
+| Anthropic | Claude Haiku 4.5 (`claude-haiku-4-5`) | 25/35 | 7.1s | 33,924 | $0.0339 |
+| Anthropic | Claude Sonnet 4.6 (`claude-sonnet-4-6`) | 26/35 | 14.6s | 33,924 | $0.1018 |
+| Anthropic | Claude Opus 4.8 (`claude-opus-4-8`) | 28/35 | 11.1s | 45,860 | $0.2293 |
+| Anthropic | Claude Fable 5 (`claude-fable-5`) | 35/35 | 12.7s | 45,860 | $0.4586 |
+| OpenAI | GPT-5.3 Codex Spark (`gpt-5.3-codex-spark`) | 26/35 | 25.9s | — | — |
+| OpenAI | GPT-5.4 Mini (`gpt-5.4-mini`) | 32/35 | 25.9s | 29,022 | $0.0218 |
+| OpenAI | GPT-5.4 (`gpt-5.4`) | 32/35 | 24.3s | 29,022 | $0.0726 |
+| OpenAI | GPT-5.5 (`gpt-5.5`) | 32/35 | 23.1s | 29,022 | $0.1451 |
+| Google | Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`) | 18/35 | 19.7s | 31,798 | $0.0080 |
+| Google | Gemini 3 Flash (preview) (`gemini-3-flash-preview`) | 16/35 | 2.5s | 31,798 | $0.0159 |
+| Google | Gemini 3.5 Flash (`gemini-3.5-flash`) | 16/35 | 2.6s | 31,798 | $0.0477 |
+| Google | Gemini 3.1 Pro (preview) (`gemini-3.1-pro-preview`) | 16/35 | 2.4s | 31,798 | $0.0636 |
 
 ### Cases
 
