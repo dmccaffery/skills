@@ -1,13 +1,13 @@
 # claude
 .claude/plans/
 
-# eval harness output
-evals-results/
-*.eval-results.json
-
 # tooling
 node_modules/
 .venv/
+
+# terraform provider/module caches (eval `command` assertions run terraform)
+.terraform/
+.terraform.lock.hcl
 
 # OS noise
 .DS_Store

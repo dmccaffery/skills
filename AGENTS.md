@@ -62,9 +62,9 @@ per tool.
 - Prefer deterministic assertions (`terraform validate`, `tflint`, file/regex checks) over LLM-judged ones.
 - Eval results and token cost are committed reports: `EVALUATION.md` (plugin-level rollup) and
   `plugins/<plugin>/EVALUATION.md` (per-eval detail), one section per provider (Anthropic, OpenAI, Google). The runners
-  regenerate both via `tools/eval/report.py` from the gitignored `evals-results/` — never edit the reports by hand.
-  Token usage comes from each provider's token-counting API; the model/pricing matrix lives in
-  `tools/eval/providers.py`.
+  regenerate both via `tools/eval/report.py` from the raw results in `evals-results/` (committed alongside the reports)
+  — never edit the reports by hand. Token usage comes from each provider's token-counting API; the model/pricing matrix
+  lives in `tools/eval/providers.py`.
 
 ## Validation
 
