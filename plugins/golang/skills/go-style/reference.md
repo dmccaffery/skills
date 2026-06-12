@@ -159,6 +159,103 @@ into a plain `Config` struct at startup and pass that down, so business logic ne
 state. A service with one entrypoint and a handful of flags does not need either library; don't add them until the
 subcommands arrive.
 
+## String building: why `strings.Builder` and not `+=`
+
+Go strings are immutable, so `s += t` cannot append in place — it allocates a fresh string and copies both operands into
+it. Inside a loop the copies compound: building an n-byte result one piece at a time copies O(n²) bytes and leaves a
+trail of garbage for the collector. `strings.Builder` accumulates into an internal byte slice that grows
+amortized-linearly (the same doubling strategy as `append`), and its `String()` returns the result without a final copy.
+
+```go
+var spec strings.Builder
+for i, d := range defaults {
+	if i > 0 {
+		spec.WriteString(",")
+	}
+	spec.WriteString(d)
+}
+return spec.String()
+```
+
+Concatenating _inside_ a builder write smuggles the same allocation back in. `b.WriteString(prefix + l + "\n")` builds a
+temporary string on the heap every iteration, copies it into the builder, then discards it — the builder was supposed to
+be the destination, not a second copy. Sequential writes append each piece directly into the builder's buffer:
+
+```go
+func writeComment(b *strings.Builder, prefix string, lines []string) {
+	for _, l := range lines {
+		b.WriteString(prefix)
+		b.WriteString(l)
+		b.WriteString("\n")
+	}
+}
+```
+
+This isn't aesthetic — `WriteString` never fails (the returned error is always nil), so a chain of writes costs nothing
+in error handling, and three appends into one growing buffer beat one allocate-copy-discard per iteration.
+
+Choosing the right tool:
+
+- **`strings.Join(parts, sep)`** when the pieces are already a `[]string` and you only need a separator — it
+  preallocates the exact result size and reads as intent, not mechanics. The loop above is `strings.Join(defaults, ",")`
+  when nothing else happens per element.
+- **`strings.Builder`** when pieces arrive incrementally, are conditional, or mix types — `WriteString`, `WriteByte`,
+  `WriteRune`, and `fmt.Fprintf(&b, ...)` all target it. Call `Grow(n)` first when the final size is known. One write
+  per piece — never `+` inside the argument.
+- **`+`** for a one-shot concatenation of a few operands in a single expression, outside any loop or builder — the
+  compiler sizes that allocation correctly; the problem is _repeated_ appends and throwaway temporaries.
+- **`fmt.Sprintf`** when you need formatting verbs, not as a concatenation operator.
+
+A `Builder` must not be copied after first use (`go vet` flags it); pass `*strings.Builder` if it crosses a function
+boundary.
+
+## Iteration: why `Seq` variants over slice-returning splits
+
+Go 1.24 added iterator (`iter.Seq[string]`) twins for the splitting functions: `strings.SplitSeq`,
+`strings.SplitAfterSeq`, `strings.FieldsSeq`, `strings.FieldsFuncSeq`, and `strings.Lines` (with the same set in
+`bytes`). `for _, w := range strings.Fields(s)` scans the whole input up front and allocates a `[]string` whose only
+purpose is to be ranged over once and garbage-collected; the `Seq` form yields each piece lazily as the scan finds it:
+
+```go
+for w := range strings.FieldsSeq(s) {
+	// ...
+}
+```
+
+Beyond skipping the slice allocation, laziness means a `break` stops the scan early — `Fields` pays for the whole input
+even if the loop returns on the first word. The individual words allocate nothing in either form (they are substrings
+sharing the input's backing array); the slice header and its growth are the waste.
+
+Keep the slice-returning forms when the slice itself is the point: you need `len(parts)`, random access by index, a
+sort, multiple passes, or you hand the slice to another function. An iterator consumed exactly once by one loop is the
+signal to switch.
+
+## `slices` and `maps`: why not hand-rolled loops
+
+Go 1.21 made the generic `slices` and `maps` packages stdlib. A scan-and-compare loop forces the reader to
+reverse-engineer the intent (is it membership? first match? does the `break` matter?) and is where off-by-one and
+forgotten-`break` bugs live; the named call is the intent, works for any element type, and gets the optimized
+implementation:
+
+| Hand-rolled loop                         | Stdlib call                                          |
+| ---------------------------------------- | ---------------------------------------------------- |
+| scan for `x == v`, `break`               | `slices.Contains(s, v)` / `slices.ContainsFunc`      |
+| scan for index of first match            | `slices.Index(s, v)` / `slices.IndexFunc`            |
+| element-wise compare two slices          | `slices.Equal` / `slices.EqualFunc`                  |
+| track `min`/`max` through a loop         | `slices.Min` / `slices.Max` / `slices.MaxFunc`       |
+| `sort.Slice(s, func(i, j int) bool {…})` | `slices.Sort` / `slices.SortFunc` (no interface box) |
+| collect map keys/values into a slice     | `slices.Collect(maps.Keys(m))` / `slices.Sorted(…)`  |
+| remove adjacent duplicates after sorting | `slices.Compact`                                     |
+
+`slices.SortFunc` with `cmp.Compare` replaces `sort.Slice` outright — generics avoid the `interface{}` boxing and
+reflection of the `sort` package, so it is both clearer and faster. `maps.Keys`/`maps.Values` return iterators (Go
+1.23); range over them directly, and materialize with `slices.Collect` or `slices.Sorted` only when a slice is actually
+needed — the same once-vs-keep test as the `Seq` rule above.
+
+Keep the explicit loop when the body does real per-element work — transforming values, appending to multiple
+collections, or interleaving effects — and when a helper would need contortions (a closure capturing three locals) to
+express what a four-line loop says plainly.
+
 ## Dependencies: stdlib-first
 
 `net/http`, `log/slog`, `encoding/json`, `testing`, and `database/sql` cover most service needs. Every dependency is a

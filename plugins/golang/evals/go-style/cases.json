@@ -50,5 +50,24 @@
       { "type": "regex", "path": "internal/cli/serve.go", "pattern": "port" },
       { "type": "not_regex", "path": "internal/cli/serve.go", "pattern": "os\\.Exit" }
     ]
+  },
+  {
+    "id": "string-builder-loop",
+    "prompt": "Refactor internal/spec/spec.go to our Go house style — modernize the string and slice handling throughout.",
+    "allowed_tools": "Read Write Edit Glob Grep Skill Bash(go *) Bash(gofmt *) Bash(mkdir *)",
+    "files": {
+      "go.mod": "module example.com/specdemo\n\ngo 1.24\n",
+      "internal/spec/spec.go": "package spec\n\nimport \"strings\"\n\n// ModelSpec renders the default model names as a comma-separated spec string.\nfunc ModelSpec(defaults []string) string {\n\tspec := \"\"\n\tfor i, d := range defaults {\n\t\tif i > 0 {\n\t\t\tspec += \",\"\n\t\t}\n\t\tspec += d\n\t}\n\treturn spec\n}\n\n// WriteComment writes each line into b as a comment line with the given prefix.\nfunc WriteComment(b *strings.Builder, prefix string, lines []string) {\n\tfor _, l := range lines {\n\t\tb.WriteString(prefix + l + \"\\n\")\n\t}\n}\n\n// LongestWord returns the longest whitespace-separated word in s.\nfunc LongestWord(s string) string {\n\tlongest := \"\"\n\tfor _, w := range strings.Fields(s) {\n\t\tif len(w) > len(longest) {\n\t\t\tlongest = w\n\t\t}\n\t}\n\treturn longest\n}\n\n// HasDefault reports whether name is one of the default model names.\nfunc HasDefault(defaults []string, name string) bool {\n\tfor _, d := range defaults {\n\t\tif d == name {\n\t\t\treturn true\n\t\t}\n\t}\n\treturn false\n}\n"
+    },
+    "assertions": [
+      { "type": "regex", "path": "internal/spec/spec.go", "pattern": "strings\\.(Builder|Join)" },
+      { "type": "regex", "path": "internal/spec/spec.go", "pattern": "strings\\.FieldsSeq" },
+      { "type": "regex", "path": "internal/spec/spec.go", "pattern": "slices\\.Contains" },
+      { "type": "not_regex", "path": "internal/spec/spec.go", "pattern": "spec \\+=" },
+      { "type": "not_regex", "path": "internal/spec/spec.go", "pattern": "WriteString\\([^)]*\\+" },
+      { "type": "not_regex", "path": "internal/spec/spec.go", "pattern": "range strings\\.Fields\\(" },
+      { "type": "command", "run": "go vet ./...", "requires": "go" },
+      { "type": "command", "run": "test -z \"$(gofmt -l .)\"", "requires": "gofmt" }
+    ]
   }
 ]

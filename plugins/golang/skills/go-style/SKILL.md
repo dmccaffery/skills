@@ -134,7 +134,71 @@ Give every command a `Short`, a `Long`, and a runnable `Example`, and expose the
 a `Root()` accessor — the `go-docs` skill generates the CLI reference from it. Keep business
 logic out of `cmd` packages: commands parse and validate input, then call `internal/` packages.
 
-## 10. Keep `go fmt` and `go vet` clean
+## 10. Build strings with `strings.Builder`, never `+=` in a loop
+
+Strings are immutable, so each `s += t` allocates and copies a new string — repeated in a loop
+that is quadratic. Accumulate with `strings.Builder` and call `String()` once at the end:
+
+```go
+var spec strings.Builder
+for i, d := range defaults {
+	if i > 0 {
+		spec.WriteString(",")
+	}
+	spec.WriteString(d)
+}
+return spec.String()
+```
+
+The same applies inside builder writes: `b.WriteString(prefix + l + "\n")` allocates a
+temporary string every iteration just to copy it into the builder. One `WriteString` per piece:
+
+```go
+for _, l := range lines {
+	b.WriteString(prefix)
+	b.WriteString(l)
+	b.WriteString("\n")
+}
+```
+
+When the parts are already a slice and you only need a separator,
+`strings.Join(defaults, ",")` is the one-line form of the same loop. A standalone `a + b`
+expression outside a loop is fine — the rule is about repeated appends.
+
+## 11. Range over `Seq` iterators, not throwaway slices
+
+When a split is consumed once by a loop, use the iterator variants (Go 1.24+) — they yield each
+piece as it is found instead of allocating a `[]string` that is immediately discarded:
+
+```go
+for w := range strings.FieldsSeq(s) {
+	// ...
+}
+```
+
+`strings.SplitSeq`, `strings.FieldsSeq`, `strings.Lines`, and their `bytes` counterparts replace
+`Split`, `Fields`, and manual line scanning inside `range` loops. Keep the slice-returning forms
+when you actually need the slice — its length, an index, a sort, or to pass it along.
+
+## 12. Reach for `slices` and `maps` before writing the loop
+
+A loop that scans for membership, an index, a minimum, or equality is a stdlib one-liner (Go
+1.21+) — `slices.Contains`, `slices.IndexFunc`, `slices.Max`, `slices.Equal`, `maps.Keys`. The
+call states the intent; the hand-rolled loop makes the reader reverse-engineer it:
+
+```go
+if slices.Contains(tokens, "all") {
+	tokens = tokens[:0]
+	for _, p := range providers {
+		tokens = append(tokens, p.Name())
+	}
+}
+```
+
+The remaining loop is fine — it transforms per element. Replace loops whose entire body is a
+comparison; use `slices.Sort`/`slices.SortFunc` over `sort.Slice` for the same reason.
+
+## 13. Keep `go fmt` and `go vet` clean
 
 Code is always `gofmt`-formatted (`go fmt ./...`) and passes `go vet ./...`. Comments state
 constraints and invariants the code cannot express — never what the next line does.
