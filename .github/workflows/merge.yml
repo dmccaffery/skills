@@ -1,0 +1,36 @@
+# Copyright 2026 Bitwise Media Group
+# SPDX-License-Identifier: MIT
+
+# Caller for the org-wide fast-forward `/merge` flow. A maintainer comments
+# `/merge` on an approved, green PR and it is fast-forwarded into the base branch,
+# preserving every commit's original signature (so release-please still sees each
+# Conventional Commit). This file owns only the trigger; the first-pass gate and
+# all authoritative checks (write access, approval, passing checks, genuine
+# fast-forward) live in the reusable workflow.
+#
+# issue_comment runs in the base-repo context, so secrets are available even for
+# fork PRs.
+#
+# Prerequisites (one-time, org-wide — see bitwise-media-group/ff-merge):
+#   - org variable FF_MERGE_CLIENT_ID and org secret FF_MERGE_PRIVATE_KEY
+#   - the "FF Merge" App installed on this repo and in the ruleset bypass list
+
+name: Fast-forward merge
+
+on:
+    issue_comment:
+        types: [created]
+
+# the App token does the privileged work; the job's GITHUB_TOKEN needs nothing
+permissions: {}
+
+jobs:
+    fast-forward:
+        # The reusable workflow gates on a /merge comment from an org member and
+        # re-verifies write access authoritatively, so no per-repo gate is needed.
+        uses: bitwise-media-group/github-workflows/.github/workflows/merge.yaml@v1
+        with:
+            pr-number: ${{ github.event.issue.number }}
+            app-client-id: ${{ vars.FF_MERGE_CLIENT_ID }}
+        secrets:
+            app-private-key: ${{ secrets.FF_MERGE_PRIVATE_KEY }}

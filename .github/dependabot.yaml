@@ -1,0 +1,47 @@
+# Copyright 2026 Bitwise Media Group
+# SPDX-License-Identifier: MIT
+
+# Opens the dependency PRs that dependabot-merge.yml fast-forwards once CI is green.
+# Unlike the github-workflows repo (workflow YAML only), this repo has three real
+# ecosystems: the SHA/tag-pinned actions in the workflow callers, the npm
+# lint/format toolchain (package.json), and the pinned Go developer CLIs
+# (tools/go.mod — the only module in go.work). The many go.mod files under
+# plugins/*/evals are intentionally pinned test fixtures and are deliberately left
+# untracked.
+version: 2
+updates:
+    - package-ecosystem: github-actions
+      directory: /
+      schedule:
+          interval: daily
+      cooldown:
+          default-days: 7
+      groups:
+          actions:
+              patterns:
+                  - actions/*
+          bitwise-media-group:
+              patterns:
+                  - bitwise-media-group/*
+
+    - package-ecosystem: npm
+      directory: /
+      schedule:
+          interval: daily
+      cooldown:
+          default-days: 7
+      groups:
+          npm:
+              patterns:
+                  - "*"
+
+    - package-ecosystem: gomod
+      directory: /tools
+      schedule:
+          interval: daily
+      cooldown:
+          default-days: 7
+      groups:
+          tools:
+              patterns:
+                  - "*"

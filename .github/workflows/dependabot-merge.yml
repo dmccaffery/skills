@@ -1,0 +1,42 @@
+# Copyright 2026 Bitwise Media Group
+# SPDX-License-Identifier: MIT
+
+# Caller for Dependabot auto-merge. When Dependabot opens a PR the reusable
+# workflow approves it if it is a minor or patch update; when the PR's CI finishes
+# green it fast-forwards it into the base branch (preserving Dependabot's signed
+# commits, via the same `ff-merge` action as the `/merge` flow). Major updates are
+# never approved, so they wait for a human.
+#
+# Requires .github/dependabot.yaml (present) so Dependabot opens PRs, and branch
+# protection that requires PR review (so the approval sets the review decision) —
+# the same assumption as the `/merge` flow.
+#
+# Prerequisites (one-time, org-wide — see bitwise-media-group/ff-merge):
+#   - org variable FF_MERGE_CLIENT_ID and org secret FF_MERGE_PRIVATE_KEY
+#   - the "FF Merge" App installed on this repo and in the ruleset bypass list
+
+name: Dependabot auto-merge
+
+# Both triggers are required. pull_request_target approves on open; workflow_run
+# fast-forwards once CI is green. check_suite is NOT usable here — GitHub does not
+# fire it for a repo's own Actions CI. `ci` is this repo's only required PR check
+# (evals.yml is workflow_dispatch-only). pull_request_target is safe here: the
+# reusable workflow never checks out or runs PR code.
+on:
+    pull_request_target:
+        types: [opened, reopened, synchronize]
+    workflow_run:
+        workflows: [ci]
+        types: [completed]
+
+# the App token does the privileged work; the caller grants nothing
+permissions: {}
+
+jobs:
+    auto-merge:
+        uses: bitwise-media-group/github-workflows/.github/workflows/dependabot-merge.yaml@v1
+        with:
+            app-client-id: ${{ vars.FF_MERGE_CLIENT_ID }}
+            # update-types: '["version-update:semver-patch", "version-update:semver-minor"]' # default
+        secrets:
+            app-private-key: ${{ secrets.FF_MERGE_PRIVATE_KEY }}
