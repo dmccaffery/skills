@@ -1,0 +1,11 @@
+# Copyright 2026 Bitwise Media Group
+# SPDX-License-Identifier: MIT
+
+# CodeQL configuration for codeql.yaml. security-extended runs the security
+# queries (a superset of the default suite) without the maintainability and
+# reliability queries that security-and-quality adds. This repo scans only the
+# `actions` language, so there is nothing to exclude.
+name: "skills CodeQL config"
+
+queries:
+    - uses: security-extended
