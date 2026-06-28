@@ -45,6 +45,12 @@
         "evolve",
         "evaluation"
       ]
+    },
+    {
+      "name": "dotnet",
+      "source": "./plugins/dotnet",
+      "description": "Modern .NET — stdlib-first C# style, SDK-style projects with CPM, xUnit testing, XML-doc conventions, NuGet trusted-publishing releases, ASP.NET Core minimal APIs, EF Core, and performance diagnostics.",
+      "keywords": ["dotnet", "csharp", "aspnetcore", "efcore", "xunit", "nuget"]
     }
   ]
 }
