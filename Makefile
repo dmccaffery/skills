@@ -26,6 +26,10 @@ fmt: node_modules ## auto-format the repo with prettier (pinned in package.json)
 	@ npm run lint:fix
 	@ go tool addlicense -l mit -c $(LICENSE_HOLDER) -s=only $(LICENSE_IGNORE) .
 
+.PHONY: build
+build: ## builds the report from the current results
+	@ echo 'noop for now'
+
 .PHONY: lint
 lint: node_modules ## markdownlint all markdown (config: .markdownlint-cli2.yaml)
 	@ npm run lint
@@ -37,8 +41,8 @@ lint: node_modules ## markdownlint all markdown (config: .markdownlint-cli2.yaml
 
 .PHONY: test
 test: ## ensures that the plugins are valid and the evaluation results meet minimum thresholds
-	@ go tool evolve run checks
-	@ go tool evolve report --check
+	@ go tool evolve run chekcs
+	@ go tool evolve report --check --junit=coverage/junit.xml --cobertura=coverage/cobertura-coverage.xml
 
 .PHONY: triggers
 triggers: ## Tier 1 - trigger accuracy + token usage
