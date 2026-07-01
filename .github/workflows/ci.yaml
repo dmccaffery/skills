@@ -1,6 +1,19 @@
 # Copyright 2026 Bitwise Media Group
 # SPDX-License-Identifier: MIT
 
+# Caller for the reusable CI workflow. It owns the push/pull_request triggers; the
+# reusable workflow runs the canonical Makefile gates (lint, build, test) as one
+# job each and sets up only the toolchains this repo has — setup-go from go.work
+# (the tools-only module `make lint` drives via `go tool`) and setup-node from
+# package.json (.node-version pins the version). `make build` is a no-op here; the
+# real work is `make lint` (markdownlint + evolve Tier 0 --strict + eval-JSON +
+# license + install.sh parse) and `make test` (evolve checks + report --check).
+#
+# coverage: false — this is a skills library, it emits no coverage, so the Codecov
+# upload job is skipped.
+#
+# Keep `name: ci`: the merge.yaml and dependabot-merge.yaml callers key their
+# workflow_run triggers on this workflow's name.
 name: ci
 
 on:
@@ -8,14 +21,12 @@ on:
     branches: [main]
   pull_request:
 
+# the reusable workflow's jobs only need contents:read; grant just that ceiling
+permissions:
+  contents: read
+
 jobs:
-  skills:
-    name: skills + manifests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: bitwise-media-group/setup-evolve@c1355d0d46a9ade667bd40c64e45ea838ab4daf8 # v1
-      - name: Tier 0 static checks
-        run: evolve run checks --strict
-      - name: Shell scripts parse
-        run: sh -n install.sh
+  ci:
+    uses: bitwise-media-group/github-workflows/.github/workflows/ci.yaml@27fe5361320037b035595ecbeefe64b06fd54178 # v4.0.4
+    with:
+      coverage: false # skills library — no coverage to upload

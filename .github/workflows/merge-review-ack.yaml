@@ -1,0 +1,27 @@
+# Copyright 2026 Bitwise Media Group
+# SPDX-License-Identifier: MIT
+
+# Companion to merge.yaml (new in v4). It closes the fork-PR auto-merge gap: an
+# approval on a fork PR carries no secrets, so merge.yaml's review path can't merge
+# it directly, and if CI was already green the approval is the last event — nothing
+# else fires to finish the merge. This workflow completes on an approving review
+# purely so its workflow_run(completed) fires in the base-repo context, where
+# merge.yaml mints the App token and retries the fast-forward. Harmless for
+# same-repo PRs (those merge via the review path directly).
+#
+# Wire-up: this workflow's name ("Fast-forward merge review ack") is listed in
+# merge.yaml's `workflow_run.workflows`. It does no privileged work — the completed
+# run is the only signal — so it needs no secret.
+
+name: Fast-forward merge review ack
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+# does no privileged work; grants nothing
+permissions: {}
+
+jobs:
+  ack:
+    uses: bitwise-media-group/github-workflows/.github/workflows/merge-review-ack.yaml@27fe5361320037b035595ecbeefe64b06fd54178 # v4.0.4

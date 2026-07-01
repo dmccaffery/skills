@@ -38,6 +38,11 @@ lint: node_modules ## markdownlint all markdown (config: .markdownlint-cli2.yaml
 		jq -e . "$$f" >/dev/null || { echo "invalid JSON: $$f"; exit 1; }; \
 	done
 	@ go tool addlicense -l mit -check -c $(LICENSE_HOLDER) -s=only $(LICENSE_IGNORE) .
+	@ sh -n install.sh
+
+.PHONY: build
+build: ## no-op build gate (nothing to compile) so the reusable CI `make build` job passes
+	@ :
 
 .PHONY: test
 test: ## ensures that the plugins are valid and the evaluation results meet minimum thresholds

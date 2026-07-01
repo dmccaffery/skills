@@ -1,35 +1,59 @@
 # Copyright 2026 Bitwise Media Group
 # SPDX-License-Identifier: MIT
 
-# release-please drives per-plugin releases from Conventional Commits. It keeps a
-# single release PR up to date; merging it bumps the changed plugin's version in
-# both manifests (.claude-plugin + .codex-plugin), updates that plugin's
-# CHANGELOG, tags it `<plugin>-vX.Y.Z`, and cuts a GitHub release. The package set
-# and current versions live in release-please-config.json and
-# .release-please-manifest.json.
+# Caller for the reusable release workflow. It owns the push trigger and grants the
+# release permissions; the reusable workflow runs release-please (two-pass) against
+# this repo's release-please-config.json + .release-please-manifest.json. There is
+# no .goreleaser.yaml and no zensical.toml, so the GoReleaser and docs-publish jobs
+# self-skip — but their permissions must still be granted (see below).
 #
-# Note: PRs opened with GITHUB_TOKEN do not trigger other workflows, so `ci` does
-# not run on the release PR on its own. To get CI (and the `/merge` flow) on the
-# release PR, mint a GitHub App token — the repo already has the FF Merge App
-# credentials (vars.FF_MERGE_CLIENT_ID / secrets.FF_MERGE_PRIVATE_KEY) — via
-# actions/create-github-app-token and pass it as `token` below instead.
+# release-please drives per-plugin releases from Conventional Commits: it keeps a
+# single release PR up to date; merging it bumps the changed plugin's version in
+# both manifests (.claude-plugin + .codex-plugin), updates that plugin's CHANGELOG,
+# tags it `<plugin>-vX.Y.Z`, and cuts a GitHub release.
+#
+# vanity-tags is left at its default (false): consumers install these plugins via
+# the marketplace manifests, not by pinning a floating `@vN` tag, so there are no
+# major/minor vanity tags to move.
+#
+# The release PR is authored by the FF Merge App (app-client-id + app-private-key
+# below), not the default GITHUB_TOKEN. That matters because a push made with
+# GITHUB_TOKEN does not emit workflow_run events (GitHub's recursion guard), so `ci`
+# would never run on the release PR and the workflow_run-keyed merge flows could
+# never complete it. Authoring as the App makes the release PR behave like any
+# other: CI runs and `/merge` / `/auto-merge` work.
 name: release
 
 on:
   push:
     branches: [main]
 
-permissions: {}
+# Ceiling for the reusable workflow's release-please + goreleaser/publish/docs jobs.
+# GitHub resolves a reusable workflow's permissions as the union of every job and
+# ignores `if:`, so grant every scope below even though the goreleaser (no
+# .goreleaser.yaml) and docs (no zensical.toml) jobs skip — a missing scope
+# startup-fails the whole run.
+permissions:
+  # create the release/tag and push the release-PR branch
+  contents: write
+  # release-please creates pr labels via the issues api
+  issues: write
+  # release-please opens the release pull request
+  pull-requests: write
+  # cosign keyless signing (goreleaser) + the docs job's Pages OIDC deploy
+  id-token: write
+  # github build-provenance attestation (goreleaser)
+  attestations: write
+  # artifact storage record for the attestation
+  artifact-metadata: write
+  # publish the docs site to GitHub Pages (docs job, when a zensical.toml exists)
+  pages: write
 
 jobs:
-  release-please:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # create tags + releases, push the release-PR branch
-      pull-requests: write # open and update the release PR
-    steps:
-      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
+  release:
+    uses: bitwise-media-group/github-workflows/.github/workflows/release.yaml@27fe5361320037b035595ecbeefe64b06fd54178 # v4.0.4
+    with:
+      # author the release PR as the FF Merge App so `ci` + auto-merge fire on it
+      app-client-id: ${{ vars.FF_MERGE_CLIENT_ID }}
+    secrets:
+      app-private-key: ${{ secrets.FF_MERGE_PRIVATE_KEY }}

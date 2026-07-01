@@ -1,15 +1,18 @@
 # Copyright 2026 Bitwise Media Group
 # SPDX-License-Identifier: MIT
 
-# Caller for the org-wide fast-forward `/merge` flow. A maintainer comments
-# `/merge` on an approved, green PR and it is fast-forwarded into the base branch,
-# preserving every commit's original signature (so release-please still sees each
-# Conventional Commit). This file owns only the trigger; the first-pass gate and
-# all authoritative checks (write access, approval, passing checks, genuine
-# fast-forward) live in the reusable workflow.
+# Caller for the org-wide fast-forward merge flows. As of v4 the reusable
+# merge.yaml owns BOTH flows: a maintainer comments `/merge` on an approved, green
+# PR to fast-forward it now, or arms `/auto-merge` (comment, or the `auto-merge`
+# label) to have it fast-forwarded automatically once approved and green. Every
+# commit's original signature is preserved (so release-please still sees each
+# Conventional Commit) via the same `ff-merge` action. This file owns only the
+# triggers; the first-pass gate and all authoritative checks (write access,
+# approval, passing checks, genuine fast-forward) live in the reusable workflow.
 #
-# issue_comment runs in the base-repo context, so secrets are available even for
-# fork PRs.
+# This replaces the separate v1 auto-merge.yaml caller — auto-merge is now folded
+# in here. issue_comment runs in the base-repo context, so secrets are available
+# even for fork PRs.
 #
 # Prerequisites (one-time, org-wide — see bitwise-media-group/ff-merge):
 #   - org variable FF_MERGE_CLIENT_ID and org secret FF_MERGE_PRIVATE_KEY
@@ -17,20 +20,35 @@
 
 name: Fast-forward merge
 
+# issue_comment drives `/merge` and arms `/auto-merge`; workflow_run(completed)
+# attempts the auto-merge once the PR is approved and green; the schedule sweeps
+# armed PRs as a backstop for any missed event. `ci` is this repo's only required
+# PR check (evals.yaml is workflow_dispatch-only); "Fast-forward merge review ack"
+# (merge-review-ack.yaml) turns an approval into a merge attempt for fork and
+# same-repo PRs alike. Whichever finishes last triggers the attempt, and ff-merge
+# re-verifies all checks regardless. None of these run PR code.
 on:
   issue_comment:
     types: [created]
+  workflow_run:
+    workflows: [ci, "Fast-forward merge review ack"]
+    types: [completed]
+  schedule:
+    # Backstop sweep of armed PRs for any missed event trigger.
+    - cron: "17 * * * *"
 
 # the App token does the privileged work; the job's GITHUB_TOKEN needs nothing
 permissions: {}
 
 jobs:
-  fast-forward:
-    # The reusable workflow gates on a /merge comment from an org member and
+  merge:
+    # The reusable workflow gates on a /merge comment from a maintainer and
     # re-verifies write access authoritatively, so no per-repo gate is needed.
-    uses: bitwise-media-group/github-workflows/.github/workflows/merge.yaml@077a003a620f49bd0062c73fc761dbea05d7fb70 # v1.1.0
+    uses: bitwise-media-group/github-workflows/.github/workflows/merge.yaml@27fe5361320037b035595ecbeefe64b06fd54178 # v4.0.4
     with:
-      pr-number: ${{ github.event.issue.number }}
       app-client-id: ${{ vars.FF_MERGE_CLIENT_ID }}
+      # merge-command: /merge     # default — the comment that merges now
+      # arm-command: /auto-merge  # default — the comment that arms auto-merge
+      # label: auto-merge         # default — the label that arms auto-merge
     secrets:
       app-private-key: ${{ secrets.FF_MERGE_PRIVATE_KEY }}
