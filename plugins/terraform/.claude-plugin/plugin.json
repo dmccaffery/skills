@@ -1,6 +1,6 @@
 {
   "name": "terraform",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Terraform style conventions, module scaffolding, and fmt/validate/tflint workflows for authoring reusable modules.",
   "author": {
     "name": "Bitwise Media Group",
