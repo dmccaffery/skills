@@ -24,3 +24,5 @@ ignores:
   - "node_modules/**"
   - ".claude/**"
   - "**/EVALUATION.md"
+  - "CHANGELOG.md"
+  - "**/CHANGELOG.md"

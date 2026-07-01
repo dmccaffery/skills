@@ -13,3 +13,6 @@ EVALUATION.json
 
 # Local agent state (plans, settings) — not part of the published repo.
 .claude/
+
+CHANGELOG.md
+**/CHANGELOG.md
