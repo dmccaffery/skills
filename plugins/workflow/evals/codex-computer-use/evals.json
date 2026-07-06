@@ -1,0 +1,108 @@
+{
+  "$schema": "https://raw.githubusercontent.com/bitwise-media-group/evolve/main/schemas/evals.schema.json",
+  "skill_name": "codex-computer-use",
+  "models": ["anthropic"],
+  "evals": [
+    {
+      "id": "inspect-evidence",
+      "name": "Check a runtime verification report against its captured evidence",
+      "prompt": "Codex just ran a runtime verification for this change; its report is at artifacts/last-message.md and the captured server log at artifacts/server.log. Following the codex-computer-use skill's evidence step, check each of the report's claims against the captured evidence and write the user-facing summary to verification.md, separating claims the evidence supports from claims it contradicts or does not cover.",
+      "allowed_tools": "Read Write Edit Glob Grep Skill Bash(python3 *) Bash(grep *)",
+      "files": ["files/artifacts/last-message.md", "files/artifacts/server.log"],
+      "expectations": [
+        "The summary reports that the server log contradicts the report: GET /dashboard returned 500 with a TemplateNotFound traceback, so the dashboard-renders and log-hygiene claims fail.",
+        "The server-boot claim is treated as supported by the log, and Codex's all-checks-passed conclusion is not repeated as verified fact."
+      ],
+      "assertions": [
+        {
+          "type": "file_exists",
+          "path": "verification.md"
+        },
+        {
+          "type": "regex",
+          "path": "verification.md",
+          "pattern": "(500|TemplateNotFound)"
+        },
+        {
+          "type": "regex",
+          "path": "verification.md",
+          "pattern": "(?i)(fail|contradict)"
+        }
+      ]
+    },
+    {
+      "id": "author-verification-prompt",
+      "name": "Author the verify-only prompt for a UI check",
+      "prompt": "I changed the signup form's client-side validation and want codex to verify it in a real browser against the local dev server: valid input reaches the welcome page, an invalid email shows the inline error, and nothing else on the page regresses. Without executing anything, author the verification prompt you would hand to codex — following the codex-computer-use skill's reference prompt — and save it as verify-prompt.md.",
+      "allowed_tools": "Read Write Edit Glob Grep Skill",
+      "assertions": [
+        {
+          "type": "file_exists",
+          "path": "verify-prompt.md"
+        },
+        {
+          "type": "regex",
+          "path": "verify-prompt.md",
+          "pattern": "## What to verify"
+        },
+        {
+          "type": "regex",
+          "path": "verify-prompt.md",
+          "pattern": "## How to check"
+        },
+        {
+          "type": "regex",
+          "path": "verify-prompt.md",
+          "pattern": "## Evidence to capture"
+        },
+        {
+          "type": "regex",
+          "path": "verify-prompt.md",
+          "pattern": "## Boundaries"
+        },
+        {
+          "type": "regex",
+          "path": "verify-prompt.md",
+          "pattern": "(?i)do not fix"
+        },
+        {
+          "type": "regex",
+          "path": "verify-prompt.md",
+          "pattern": "(?i)screenshot"
+        }
+      ]
+    },
+    {
+      "id": "command-shapes-verify",
+      "name": "Author the exact codex exec commands for a runtime verification",
+      "prompt": "Without executing anything, write the exact shell commands you would run — following the codex-computer-use skill — to have Codex verify a UI change in the local app. Put them in codex-verify.sh: create the artifact directory with its screenshots subdirectory, write the verification prompt file, and run the codex exec shape this skill uses.",
+      "allowed_tools": "Read Write Edit Glob Grep Skill",
+      "assertions": [
+        {
+          "type": "file_exists",
+          "path": "codex-verify.sh"
+        },
+        {
+          "type": "regex",
+          "path": "codex-verify.sh",
+          "pattern": "mktemp -d.*TMPDIR"
+        },
+        {
+          "type": "regex",
+          "path": "codex-verify.sh",
+          "pattern": "screenshots"
+        },
+        {
+          "type": "regex",
+          "path": "codex-verify.sh",
+          "pattern": "codex .*exec --sandbox danger-full-access"
+        },
+        {
+          "type": "regex",
+          "path": "codex-verify.sh",
+          "pattern": "--output-last-message"
+        }
+      ]
+    }
+  ]
+}

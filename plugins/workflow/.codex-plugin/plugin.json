@@ -1,7 +1,7 @@
 {
   "name": "workflow",
   "version": "1.0.0",
-  "description": "Developer-workflow commands and skills — sandbox-safe Conventional commits with a commit.sh handoff, immutable code-scanning triage reports with SHA-pinned permalinks, and generation of evolve evaluation suites (triggers + behavioral evals) for agent skills.",
+  "description": "Developer-workflow commands and skills \u2014 sandbox-safe Conventional commits with a commit.sh handoff, immutable code-scanning triage reports with SHA-pinned permalinks, generation of evolve evaluation suites (triggers + behavioral evals) for agent skills, and OpenAI Codex CLI delegation for second-pass code reviews, bulk mechanical coding tasks, and runtime UI verification, with every result independently verified.",
   "author": {
     "name": "Bitwise Media Group",
     "email": "deavon@bitwisemedia.co.uk"
@@ -16,7 +16,14 @@
     "codeql",
     "evals",
     "evolve",
-    "evaluation"
+    "evaluation",
+    "code-review",
+    "codex",
+    "second-opinion",
+    "delegation",
+    "migration",
+    "computer-use",
+    "verification"
   ],
   "interface": {
     "displayName": "Workflow",

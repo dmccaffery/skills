@@ -1,0 +1,66 @@
+{
+  "$schema": "https://raw.githubusercontent.com/bitwise-media-group/evolve/main/schemas/triggers.schema.json",
+  "skill_name": "codex-computer-use",
+  "triggers": [
+    {
+      "query": "Use codex to click through the new onboarding flow in the iOS simulator and verify it matches the spec",
+      "should_trigger": true
+    },
+    {
+      "query": "Have codex take screenshots of the dashboard after my CSS changes and check nothing is visually broken",
+      "should_trigger": true
+    },
+    {
+      "query": "Verify the app actually renders the new empty state — launch it and look",
+      "should_trigger": true
+    },
+    {
+      "query": "Get codex to open the site in a browser and confirm the checkout flow works end to end",
+      "should_trigger": true
+    },
+    {
+      "query": "I need an independent runtime check that the animation plays correctly in the simulator",
+      "should_trigger": true
+    },
+    {
+      "query": "Use another agent to verify the Electron app boots and the settings panel opens",
+      "should_trigger": true
+    },
+    {
+      "query": "Spin up the simulator and confirm the deep link opens the right screen",
+      "should_trigger": true
+    },
+    {
+      "query": "Check what the login page actually looks like after this change and capture a screenshot",
+      "should_trigger": true
+    },
+    {
+      "query": "Run the unit tests and tell me if they pass",
+      "should_trigger": false
+    },
+    {
+      "query": "Typecheck the project and fix any errors",
+      "should_trigger": false
+    },
+    {
+      "query": "Use codex to review my UI changes before I merge",
+      "should_trigger": false
+    },
+    {
+      "query": "Delegate the component renames across the frontend to codex",
+      "should_trigger": false
+    },
+    {
+      "query": "Read through the view controller and explain how the layout is built",
+      "should_trigger": false
+    },
+    {
+      "query": "Run the linter on the frontend and clean up the warnings",
+      "should_trigger": false
+    },
+    {
+      "query": "Set up the codex CLI on my machine",
+      "should_trigger": false
+    }
+  ]
+}

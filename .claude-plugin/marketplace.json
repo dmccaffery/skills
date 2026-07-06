@@ -9,7 +9,7 @@
     {
       "name": "golang",
       "source": "./plugins/golang",
-      "description": "Modern Go development — stdlib-first style, cobra/viper CLIs, table-driven tests and fuzzing, canonical project layout, doc-comment conventions, GoReleaser releases.",
+      "description": "Modern Go development \u2014 stdlib-first style, cobra/viper CLIs, table-driven tests and fuzzing, canonical project layout, doc-comment conventions, GoReleaser releases.",
       "keywords": ["go", "golang", "testing", "goreleaser", "cobra", "godoc"]
     },
     {
@@ -27,13 +27,13 @@
     {
       "name": "python",
       "source": "./plugins/python",
-      "description": "Modern Python on the Astral toolchain — uv project layout, ruff format/lint, ty/pyright type checking, pytest with Hypothesis, Google-style docstrings with CLI references, and trusted-publishing releases.",
+      "description": "Modern Python on the Astral toolchain \u2014 uv project layout, ruff format/lint, ty/pyright type checking, pytest with Hypothesis, Google-style docstrings with CLI references, and trusted-publishing releases.",
       "keywords": ["python", "uv", "ruff", "ty", "pyright", "pytest", "typing"]
     },
     {
       "name": "workflow",
       "source": "./plugins/workflow",
-      "description": "Developer-workflow commands and skills — sandbox-safe Conventional commits with a commit.sh handoff, immutable code-scanning triage reports with SHA-pinned permalinks, and generation of evolve evaluation suites (triggers + behavioral evals) for agent skills.",
+      "description": "Developer-workflow commands and skills \u2014 sandbox-safe Conventional commits with a commit.sh handoff, immutable code-scanning triage reports with SHA-pinned permalinks, generation of evolve evaluation suites (triggers + behavioral evals) for agent skills, and OpenAI Codex CLI delegation for second-pass code reviews, bulk mechanical coding tasks, and runtime UI verification, with every result independently verified.",
       "keywords": [
         "git",
         "commit",
@@ -43,7 +43,14 @@
         "codeql",
         "evals",
         "evolve",
-        "evaluation"
+        "evaluation",
+        "code-review",
+        "codex",
+        "second-opinion",
+        "delegation",
+        "migration",
+        "computer-use",
+        "verification"
       ]
     }
   ]
