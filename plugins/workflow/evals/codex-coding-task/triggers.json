@@ -1,0 +1,66 @@
+{
+  "$schema": "https://raw.githubusercontent.com/bitwise-media-group/evolve/main/schemas/triggers.schema.json",
+  "skill_name": "codex-coding-task",
+  "triggers": [
+    {
+      "query": "Shell out to codex to rename every occurrence of getUser to fetchUser across the repo",
+      "should_trigger": true
+    },
+    {
+      "query": "Have codex do the bulk migration of these config files from YAML to TOML",
+      "should_trigger": true
+    },
+    {
+      "query": "Delegate this to codex: apply the deprecation shim to all two hundred call sites",
+      "should_trigger": true
+    },
+    {
+      "query": "Use codex to implement this endpoint — the spec is fully written out in api.md",
+      "should_trigger": true
+    },
+    {
+      "query": "Get codex to run the data analysis over the CSV exports and summarize the trends",
+      "should_trigger": true
+    },
+    {
+      "query": "Offload this mechanical refactor to gpt-5.5 and check its work",
+      "should_trigger": true
+    },
+    {
+      "query": "Use codex to update the copyright headers in every source file",
+      "should_trigger": true
+    },
+    {
+      "query": "Farm the v1-to-v2 schema migration out to another agent — it's completely rule-based",
+      "should_trigger": true
+    },
+    {
+      "query": "Use codex to review my changes before I merge",
+      "should_trigger": false
+    },
+    {
+      "query": "Get a second opinion from codex on this diff",
+      "should_trigger": false
+    },
+    {
+      "query": "Rename this variable in utils.py",
+      "should_trigger": false
+    },
+    {
+      "query": "Help me design the architecture for the new billing system",
+      "should_trigger": false
+    },
+    {
+      "query": "Debug why this test is failing intermittently",
+      "should_trigger": false
+    },
+    {
+      "query": "Set up the codex CLI on my machine",
+      "should_trigger": false
+    },
+    {
+      "query": "Add a GitHub Actions job that runs codex on a nightly schedule",
+      "should_trigger": false
+    }
+  ]
+}

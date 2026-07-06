@@ -1,0 +1,103 @@
+{
+  "$schema": "https://raw.githubusercontent.com/bitwise-media-group/evolve/main/schemas/evals.schema.json",
+  "skill_name": "codex-coding-task",
+  "models": ["anthropic"],
+  "evals": [
+    {
+      "id": "verify-codex-work",
+      "name": "Verify a delegated bulk rename against its spec before reporting it",
+      "prompt": "Codex just ran a delegated bulk task in this workspace: the spec was to rename get_user to fetch_user across src/, updating the definition and every import and call site. Its completion message is at last-message.md. Following the codex-coding-task skill's verification step, verify the work against the spec and write the user-facing summary to verification.md, separating what you verified from any discrepancies you found.",
+      "allowed_tools": "Read Write Edit Glob Grep Skill Bash(python3 *) Bash(grep *)",
+      "files": ["files/src/store.py", "files/src/api.py", "files/src/legacy.py", "files/last-message.md"],
+      "expectations": [
+        "The summary identifies that src/legacy.py still imports and calls get_user, so the rename is incomplete and the import is broken, contradicting Codex's completion claim.",
+        "Codex's 'rename is complete' claim is not repeated as verified fact; the summary distinguishes checked results from Codex's claims."
+      ],
+      "assertions": [
+        {
+          "type": "file_exists",
+          "path": "verification.md"
+        },
+        {
+          "type": "regex",
+          "path": "verification.md",
+          "pattern": "legacy"
+        },
+        {
+          "type": "regex",
+          "path": "verification.md",
+          "pattern": "get_user"
+        }
+      ]
+    },
+    {
+      "id": "author-task-prompt",
+      "name": "Author the structured task prompt for a delegable migration",
+      "prompt": "I want to delegate this to codex: convert every .yaml file under config/ to .toml, preserving keys and values exactly, deleting the .yaml originals, and leaving everything outside config/ untouched; the result must pass `make lint`. Without executing anything, author the task prompt you would hand to codex — following the codex-coding-task skill's reference prompt — and save it as task-prompt.md.",
+      "allowed_tools": "Read Write Edit Glob Grep Skill",
+      "assertions": [
+        {
+          "type": "file_exists",
+          "path": "task-prompt.md"
+        },
+        {
+          "type": "regex",
+          "path": "task-prompt.md",
+          "pattern": "## Task"
+        },
+        {
+          "type": "regex",
+          "path": "task-prompt.md",
+          "pattern": "## Scope"
+        },
+        {
+          "type": "regex",
+          "path": "task-prompt.md",
+          "pattern": "## Constraints"
+        },
+        {
+          "type": "regex",
+          "path": "task-prompt.md",
+          "pattern": "(?i)## Definition of done"
+        },
+        {
+          "type": "regex",
+          "path": "task-prompt.md",
+          "pattern": "(?i)ambiguous"
+        }
+      ]
+    },
+    {
+      "id": "command-shapes-exec",
+      "name": "Author the exact codex exec commands for a mechanical edit task",
+      "prompt": "Without executing anything, write the exact shell commands you would run — following the codex-coding-task skill — to have Codex perform a mechanical rename across this repository. Put them in codex-task.sh: create the artifact directory, snapshot the starting git state, write the task prompt file, and run the codex exec shape for workspace edits.",
+      "allowed_tools": "Read Write Edit Glob Grep Skill",
+      "assertions": [
+        {
+          "type": "file_exists",
+          "path": "codex-task.sh"
+        },
+        {
+          "type": "regex",
+          "path": "codex-task.sh",
+          "pattern": "mktemp -d.*TMPDIR"
+        },
+        {
+          "type": "regex",
+          "path": "codex-task.sh",
+          "pattern": "codex .*exec --full-auto"
+        },
+        {
+          "type": "regex",
+          "path": "codex-task.sh",
+          "pattern": "--output-last-message"
+        },
+        {
+          "type": "regex",
+          "path": "codex-task.sh",
+          "pattern": "git status --porcelain"
+        }
+      ]
+    }
+  ]
+}
