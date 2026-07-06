@@ -1,0 +1,88 @@
+{
+  "$schema": "https://raw.githubusercontent.com/bitwise-media-group/evolve/main/schemas/evals.schema.json",
+  "skill_name": "codex-code-review",
+  "models": ["anthropic"],
+  "evals": [
+    {
+      "id": "verify-codex-report",
+      "name": "Verify a Codex report against the code before presenting it",
+      "prompt": "Codex has already run a second-pass review of src/rate_limiter.py; its report is at codex-report.md. Following the codex-code-review skill's verification step, check each finding against the actual code and write the user-facing summary to review.md, separating confirmed issues from findings you could not confirm or judged wrong.",
+      "allowed_tools": "Read Write Edit Glob Grep Skill Bash(python3 *)",
+      "files": ["files/src/rate_limiter.py", "files/codex-report.md"],
+      "expectations": [
+        "The off-by-one rate-limit finding is presented as a confirmed issue after checking the code.",
+        "The unbounded-memory finding is identified as incorrect — the allow method prunes timestamps older than the window on every call — and is not presented as a confirmed issue."
+      ],
+      "assertions": [
+        {
+          "type": "file_exists",
+          "path": "review.md"
+        },
+        {
+          "type": "regex",
+          "path": "review.md",
+          "pattern": "(?i)(off.by.one|limit \\+ 1|one extra|>=)"
+        },
+        {
+          "type": "regex",
+          "path": "review.md",
+          "pattern": "(?i)confirm"
+        }
+      ]
+    },
+    {
+      "id": "codex-missing-direct-fallback",
+      "name": "Report a missing codex CLI and fall back to a direct review",
+      "prompt": "I want a codex second-pass review of the new file src/config.py, but the codex CLI is not installed in this environment. Follow the codex-code-review skill's guidance for that case: report the situation and review the file directly yourself. Write the user-facing summary to review.md.",
+      "allowed_tools": "Read Write Edit Glob Grep Skill Bash(python3 *)",
+      "files": ["files/src/config.py"],
+      "expectations": [
+        "The summary states that the codex CLI was unavailable rather than fabricating or paraphrasing a Codex report.",
+        "The direct review finds the mutable default argument in load_config (overrides={} is mutated via overrides.update, leaking state across calls)."
+      ],
+      "assertions": [
+        {
+          "type": "file_exists",
+          "path": "review.md"
+        },
+        {
+          "type": "regex",
+          "path": "review.md",
+          "pattern": "(?i)codex"
+        },
+        {
+          "type": "regex",
+          "path": "review.md",
+          "pattern": "(?i)(mutable|default argument|overrides)"
+        }
+      ]
+    },
+    {
+      "id": "command-shapes-branch-review",
+      "name": "Author the exact codex review commands for a branch target",
+      "prompt": "Without executing anything, write the exact shell commands you would run — following the codex-code-review skill — to have Codex review the current branch against main. Put them in codex-review.sh: create the artifact directory, write the review prompt file, and run the matching codex review command shape.",
+      "allowed_tools": "Read Write Edit Glob Grep Skill",
+      "assertions": [
+        {
+          "type": "file_exists",
+          "path": "codex-review.sh"
+        },
+        {
+          "type": "regex",
+          "path": "codex-review.sh",
+          "pattern": "mktemp -d.*TMPDIR"
+        },
+        {
+          "type": "regex",
+          "path": "codex-review.sh",
+          "pattern": "codex .*review --base main"
+        },
+        {
+          "type": "regex",
+          "path": "codex-review.sh",
+          "pattern": "(?i)prompt"
+        }
+      ]
+    }
+  ]
+}

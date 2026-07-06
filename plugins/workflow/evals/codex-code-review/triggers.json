@@ -1,0 +1,66 @@
+{
+  "$schema": "https://raw.githubusercontent.com/bitwise-media-group/evolve/main/schemas/triggers.schema.json",
+  "skill_name": "codex-code-review",
+  "triggers": [
+    {
+      "query": "Get a second opinion on my uncommitted changes using codex",
+      "should_trigger": true
+    },
+    {
+      "query": "Run a codex review of this branch against main",
+      "should_trigger": true
+    },
+    {
+      "query": "Use gpt-5.5 to do an independent review of this refactor",
+      "should_trigger": true
+    },
+    {
+      "query": "I'd like a second-pass review of this diff from another agent before I merge",
+      "should_trigger": true
+    },
+    {
+      "query": "Have codex double-check the commit I just made",
+      "should_trigger": true
+    },
+    {
+      "query": "This change touches half the codebase — get another model to review it before I open the PR",
+      "should_trigger": true
+    },
+    {
+      "query": "Ask codex to look over the auth changes for security issues",
+      "should_trigger": true
+    },
+    {
+      "query": "Cross-check your review of PR 214 with an independent codex review",
+      "should_trigger": true
+    },
+    {
+      "query": "Review this function for bugs",
+      "should_trigger": false
+    },
+    {
+      "query": "Take a quick look at my last commit and tell me if anything is wrong",
+      "should_trigger": false
+    },
+    {
+      "query": "Use codex to implement the login feature",
+      "should_trigger": false
+    },
+    {
+      "query": "Set up the codex CLI on my machine",
+      "should_trigger": false
+    },
+    {
+      "query": "Add a GitHub Actions job that runs codex review on every pull request",
+      "should_trigger": false
+    },
+    {
+      "query": "Fix the issues codex found in its last review",
+      "should_trigger": false
+    },
+    {
+      "query": "Which model does the codex CLI use by default?",
+      "should_trigger": false
+    }
+  ]
+}
